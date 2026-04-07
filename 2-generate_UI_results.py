@@ -6,7 +6,7 @@ Usage:
 
 Defaults:
     --data-folder  data/WestAsia2026/analysis/Lebanon/
-    --viz-folder   src/viz/
+    --viz-folder   src/viz/Lebanon_src/
 """
 
 import argparse
@@ -506,7 +506,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--viz-folder",
-        default="src/viz/",
+        default="src/viz/LebanLebanon_src/",
         help="Output folder for JS visualisation files",
     )
     args = parser.parse_args()
