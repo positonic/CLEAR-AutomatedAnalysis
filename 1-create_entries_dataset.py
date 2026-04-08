@@ -12,7 +12,7 @@ from typing import Dict
 dotenv.load_dotenv()
 
 openai_api_key = os.getenv("openai_api_key")
-RW_url = "https://reliefweb.int/updates?advanced-search=%28PC121.PC137%29_%28DO20260315-20260321%29&page={}"
+RW_url = "https://reliefweb.int/updates?advanced-search=%28C220%29_%28DO20260315-20260321%29&page={}"
 
 
 def _extract_entries(
@@ -25,12 +25,16 @@ def _extract_entries(
 
     extractor = SemanticEntriesExtractor(max_sentences=5, overlap=2)
     entries = extractor(leads[text_column].tolist())
-    leads[entries_column] = entries
+    if isinstance(entries[0], dict):
+        entries_text = [entry["text"] for entry in entries]
+    else:
+        entries_text = entries
+    # entries_page_number = [entry["page"] for entry in entries]
+    leads[entries_column] = entries_text
+    # leads[entries_page_number_column] = entries_page_number
     leads = leads.explode(entries_column)
     leads = leads.drop_duplicates(subset=[entries_column])
-    leads = leads[leads[entries_column].apply(lambda x: len(str(x)) > 3)].drop(
-        columns=[text_column]
-    )
+    leads = leads[leads[entries_column].apply(lambda x: len(str(x)) > 3)].drop(columns=[text_column])
     return leads
 
 
@@ -86,7 +90,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--sample_bool", type=str, default="true")
-    parser.add_argument("--project_name", type=str, default="WestAsia2026")
+    parser.add_argument("--project_name", type=str, default="Sudan2026")
     parser.add_argument("--text_column", type=str, default="text")
     parser.add_argument("--entries_column", type=str, default="Extraction Text")
     parser.add_argument(
@@ -94,7 +98,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--prediction_ratio", type=float, default=1.05)
     parser.add_argument(
-        "--countries_to_analyze", type=str, nargs="+", default="Lebanon"
+        "--countries_to_analyze", type=str, nargs="+", default="Sudan"
     )
     parser.add_argument("--n_kept_entries", type=int, default=12)
     parser.add_argument("--answers_save_path", type=str, default="answers.json")
@@ -120,7 +124,7 @@ if __name__ == "__main__":
         project_page_starting_url=RW_url,
         project_name=args.project_name,
         data_folder="data",
-        extracted_data_path="data/leads.csv",
+        extracted_data_path=os.path.join("data", args.project_name, "leads.csv"),
         openai_api_key=openai_api_key,  # falls back to OPENAI_API_KEY env var
         extract_pdf_text=True,
         save=True,
