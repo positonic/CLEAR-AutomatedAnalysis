@@ -5,8 +5,7 @@ Usage:
     python generate_final_results.py [--data-folder DATA_FOLDER] [--viz-folder VIZ_FOLDER]
 
 Defaults:
-    --data-folder  data/WestAsia2026/analysis/Lebanon/
-    --viz-folder   src/viz/Lebanon_src/
+    --country  Lebanon
 """
 
 import argparse
@@ -45,6 +44,7 @@ PILLARS_2D = ["Impact", "Humanitarian Conditions", "At Risk"]
 # Data loading
 # ---------------------------------------------------------------------------
 
+
 def load_data(data_folder: str) -> dict:
     """Load all required input files and return them as a dict of DataFrames."""
     with open(os.path.join(data_folder, "answers.json")) as f:
@@ -65,11 +65,18 @@ def load_data(data_folder: str) -> dict:
     with open(os.path.join(data_folder, "context_figures.json")) as f:
         context_figures = json.load(f)
 
+    with open(os.path.join(data_folder, "information_coverage_gaps.json")) as f:
+        information_coverage_gaps = json.load(f)
+
     numbers_df = pd.read_csv(os.path.join(data_folder, "numbers_extraction.csv"))
 
-    classification_csv = os.path.join(data_folder, "../..", "classification_dataset.csv")
+    classification_csv = os.path.join(
+        data_folder, "../..", "classification_dataset.csv"
+    )
     classification_df = pd.read_csv(classification_csv)
-    classification_df["Document Source"] = classification_df["Document Source"].apply(literal_eval)
+    classification_df["Document Source"] = classification_df["Document Source"].apply(
+        literal_eval
+    )
     classification_df = classification_df[["Entry ID", "Document Source"]]
     classification_df["Entry ID"] = classification_df["Entry ID"].astype(int)
 
@@ -80,6 +87,7 @@ def load_data(data_folder: str) -> dict:
         "priority_needs_df": priority_needs_df,
         "priority_interventions_df": priority_interventions_df,
         "context_figures": context_figures,
+        "information_coverage_gaps": information_coverage_gaps,
         "numbers_df": numbers_df,
         "classification_df": classification_df,
     }
@@ -88,6 +96,7 @@ def load_data(data_folder: str) -> dict:
 # ---------------------------------------------------------------------------
 # JS helpers
 # ---------------------------------------------------------------------------
+
 
 def _write_js(viz_folder: str, filename: str, variable_name: str, data) -> None:
     """Serialise *data* to a JS file that sets a named window variable."""
@@ -106,6 +115,7 @@ def _write_js(viz_folder: str, filename: str, variable_name: str, data) -> None:
 # ---------------------------------------------------------------------------
 # Pipeline steps
 # ---------------------------------------------------------------------------
+
 
 def generate_shown_risks(
     risks_df: pd.DataFrame,
@@ -160,9 +170,13 @@ def generate_humanitarian_access_data(
     result: dict = defaultdict()
 
     for subpillar in ha_risks_df.subpillar.unique():
-        high_risks = ha_risks_df[
-            (ha_risks_df.subpillar == subpillar) & (ha_risks_df.risk_score >= 8)
-        ].risk.unique().tolist()
+        high_risks = (
+            ha_risks_df[
+                (ha_risks_df.subpillar == subpillar) & (ha_risks_df.risk_score >= 8)
+            ]
+            .risk.unique()
+            .tolist()
+        )
 
         high_numbers_df = key_indicator_numbers_df[
             (key_indicator_numbers_df.pillar == "Humanitarian Access")
@@ -176,7 +190,12 @@ def generate_humanitarian_access_data(
         for _, row in high_numbers_df.iterrows():
             result[row["key_indicator"]] = f"{row['risk_score']} {row['unit']}"
 
-    _write_js(viz_folder, "humanitarian_access_data.js", "HUMANITARIAN_ACCESS_DATA", dict(result))
+    _write_js(
+        viz_folder,
+        "humanitarian_access_data.js",
+        "HUMANITARIAN_ACCESS_DATA",
+        dict(result),
+    )
     return dict(result)
 
 
@@ -191,10 +210,18 @@ def generate_key_sector_numbers(
     filtered = key_indicator_numbers_df[
         (key_indicator_numbers_df.task == "situation_analysis_2d")
         & (key_indicator_numbers_df.risk_score >= 8)
-        & (key_indicator_numbers_df.number.apply(lambda x: isinstance(x, int) and x > 100))
+        & (
+            key_indicator_numbers_df.number.apply(
+                lambda x: isinstance(x, int) and x > 100
+            )
+        )
         & ~(
             (key_indicator_numbers_df.unit == "people")
-            & (key_indicator_numbers_df.number.apply(lambda x: isinstance(x, int) and x < 1_000))
+            & (
+                key_indicator_numbers_df.number.apply(
+                    lambda x: isinstance(x, int) and x < 1_000
+                )
+            )
         )
     ]
 
@@ -203,12 +230,9 @@ def generate_key_sector_numbers(
         sector_df = filtered[filtered.sector == sector]
         for unit in sector_df.unit.unique():
             max_val = sector_df[sector_df.unit == unit].number.max()
-            best_row = (
-                sector_df[(sector_df.unit == unit) & (sector_df.number == max_val)][
-                    ["sector", "key_indicator", "number", "unit"]
-                ]
-                .head(1)
-            )
+            best_row = sector_df[
+                (sector_df.unit == unit) & (sector_df.number == max_val)
+            ][["sector", "key_indicator", "number", "unit"]].head(1)
             rows.append(best_row)
 
     table = (
@@ -232,7 +256,9 @@ def generate_key_sector_numbers(
     return grouped
 
 
-def generate_current_hazards_and_threats(risks_df: pd.DataFrame, viz_folder: str) -> list:
+def generate_current_hazards_and_threats(
+    risks_df: pd.DataFrame, viz_folder: str
+) -> list:
     """Extract unique risks from the 'Hazard & Threats' subpillar."""
     data = risks_df[risks_df.subpillar == "Hazard & Threats"].risk.unique().tolist()
     _write_js(
@@ -280,7 +306,9 @@ def generate_displacement_risks(risks_df: pd.DataFrame, viz_folder: str) -> dict
         )
         data[subpillar] = top4
 
-    _write_js(viz_folder, "displacement_risks_data.js", "DISPLACEMENT_RISKS_DATA", dict(data))
+    _write_js(
+        viz_folder, "displacement_risks_data.js", "DISPLACEMENT_RISKS_DATA", dict(data)
+    )
     print(f"  ({len(data)} subpillars)")
     return dict(data)
 
@@ -328,35 +356,51 @@ def generate_top_priority_interventions(
     return dict(data)
 
 
-def generate_displacement_numbers(numbers_df: pd.DataFrame, viz_folder: str) -> list:
+def generate_displacement_numbers(
+    numbers_df: pd.DataFrame, viz_folder: str, country: str
+) -> list:
     """
-    Find high-confidence displacement counts for Lebanon and persist as JS.
+    Find high-confidence displacement counts for the country and persist as JS.
     """
     filtered = numbers_df[
         (numbers_df["what_happened"] == "displaced")
         & (numbers_df["risk_score"] >= 9)
         & (numbers_df["number"] > 100)
-        & (numbers_df["start_location"] == "Lebanon")
+        & (numbers_df["start_location"] == country)
     ]
     merged = merge_entries_by_number(filtered)
 
-    data = [{"number": row["number"], "unit": row["unit"]} for _, row in merged.iterrows()]
+    data = [
+        {"number": row["number"], "unit": row["unit"]} for _, row in merged.iterrows()
+    ]
     _write_js(viz_folder, "displacement_data.js", "DISPLACEMENT_DATA", data)
     print(f"  ({len(data)} items)")
     return data
 
 
-def generate_final_numbers(numbers_df: pd.DataFrame, viz_folder: str) -> list:
+def generate_final_numbers(
+    numbers_df: pd.DataFrame, viz_folder: str, country: str
+) -> list:
     """
     For each event type (displaced / killed / injured …), keep only the largest
-    reported figure for Lebanon with risk score >= 8.
+    reported figure for the country with risk score >= 8.
     """
+    # filtered = numbers_df[
+    #     (numbers_df["risk_score"] >= 8)
+    #     & (numbers_df["number"] > 100)
+    #     & (numbers_df["start_location"] == country)
+    # ]
+    keep_what_happened = ["affected", "in need", "at risk", "displaced", "killed", "injured"]
+
     filtered = numbers_df[
-        (numbers_df["risk_score"] >= 8)
-        & (numbers_df["number"] > 100)
-        & (numbers_df["start_location"] == "Lebanon")
+        (
+            numbers_df["what_happened"].isin(keep_what_happened)
+        )
+        & (numbers_df["start_location"] == country)
     ]
     merged = merge_entries_by_number(filtered)
+    # sort by keep_what_happened priority
+    merged = merged.sort_values(by="what_happened", key=lambda x: x.isin(keep_what_happened).astype(int), ascending=True)
 
     data = []
     for what_happened in merged["what_happened"].unique():
@@ -385,16 +429,13 @@ def generate_top_5_sources(
     Count how many times each source document is cited across all answers,
     and return the top-5 most-cited sources.
     """
-    id_counts = (
-        answers_df[["ID"]]
-        .explode("ID")["ID"]
-        .value_counts()
-        .to_frame()
-    )
+    id_counts = answers_df[["ID"]].explode("ID")["ID"].value_counts().to_frame()
     id_counts["ID"] = id_counts.index.astype(int)
     id_counts.reset_index(drop=True, inplace=True)
 
-    merged = pd.merge(id_counts, classification_df, left_on="ID", right_on="Entry ID", how="inner")
+    merged = pd.merge(
+        id_counts, classification_df, left_on="ID", right_on="Entry ID", how="inner"
+    )
 
     top5 = (
         merged.explode("Document Source")
@@ -410,9 +451,7 @@ def generate_top_5_sources(
     return top5
 
 
-def generate_output_context_risks(
-    context_figures: list, viz_folder: str
-) -> dict:
+def generate_output_context_risks(context_figures: list, viz_folder: str) -> dict:
     """
     Flatten context_figures JSON, filter for critical risks (score >= 9),
     and group by context pillar.
@@ -437,17 +476,122 @@ def generate_output_context_risks(
         data[row["context_pillar"]].append(row["risk"])
 
     _write_js(
-        viz_folder, "output_context_risks_data.js", "OUTPUT_CONTEXT_RISKS_DATA", dict(data)
+        viz_folder,
+        "output_context_risks_data.js",
+        "OUTPUT_CONTEXT_RISKS_DATA",
+        dict(data),
     )
     print(f"  ({len(data)} context pillars)")
     return dict(data)
+
+
+def generate_information_coverage(
+    context_figures: list,
+    information_coverage_gaps: list,
+    viz_folder: str,
+) -> dict:
+    """
+    Merge context_figures (context-pillar level) and information_coverage_gaps
+    (situation-analysis pillar/subpillar/sector level) into a single structure
+    that drives the Information Coverage dashboard page.
+
+    Output schema
+    -------------
+    {
+        "overall_score": float,          # mean across ALL scored entries
+        "context": [                     # one entry per context_figures pillar
+            {
+                "pillar": str,
+                "coverage": int,         # 0–10
+                "gaps": [str, ...]
+            },
+            ...
+        ],
+        "analysis": [                    # one group per unique analysis pillar
+            {
+                "pillar": str,
+                "avg_coverage": float,
+                "entries": [
+                    {
+                        "subpillar": str,
+                        "sector": str,   # "-" when not sector-specific
+                        "coverage": int,
+                        "gaps": [str, ...]
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    }
+    """
+    # ── Analysis pillars ───────────────────────────────────────────────────
+    pillar_map: dict = defaultdict(list)
+    for item in context_figures:
+        figs = item.get("figures", {})
+        pillar_map["Context"].append(
+            {
+                "subpillar": item["context_pillar"],
+                "coverage": figs.get("information_coverage", 0),
+                "gaps": figs.get("information_gaps", []),
+            }
+        )
+    for entry in information_coverage_gaps:
+        pillar_map[entry["pillar"]].append(
+            {
+                "subpillar": entry["subpillar"],
+                "sector": entry.get("sector", "-"),
+                "coverage": entry["information_coverage"],
+                "gaps": entry["information_gaps"],
+            }
+        )
+
+    analysis_out = []
+    for pillar, entries in pillar_map.items():
+        avg = sum(e["coverage"] for e in entries) / len(entries) if entries else 0
+        analysis_out.append(
+            {
+                "pillar": pillar,
+                "avg_coverage": round(avg, 1),
+                "entries": entries,
+            }
+        )
+    # Sort by avg_coverage ascending so weakest pillars appear first
+    analysis_out.sort(key=lambda x: x["avg_coverage"])
+
+    # ── Overall score ──────────────────────────────────────────────────────
+    all_scores = [
+        e["coverage"] for p in analysis_out for e in p["entries"]
+    ]
+    overall_score = round(sum(all_scores) / len(all_scores), 1) if all_scores else 0
+
+    data = {
+        "overall_score": overall_score,
+        "total_gaps": sum(len(e["gaps"]) for p in analysis_out for e in p["entries"]),
+        "analysis": analysis_out,
+    }
+
+    _write_js(
+        viz_folder,
+        "information_coverage_data.js",
+        "INFORMATION_COVERAGE_DATA",
+        data,
+    )
+    total_entries = sum(len(p["entries"]) for p in analysis_out)
+    print(
+        f"  (overall score: {overall_score}/10, "
+        f"{total_entries} scored entries, "
+        f"{data['total_gaps']} gap items)"
+    )
+    return data
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-def run(data_folder: str, viz_folder: str) -> None:
+
+def run(data_folder: str, viz_folder: str, country: str) -> None:
     print(f"Loading data from: {data_folder}")
     data = load_data(data_folder)
 
@@ -457,6 +601,7 @@ def run(data_folder: str, viz_folder: str) -> None:
     priority_needs_df = data["priority_needs_df"]
     priority_interventions_df = data["priority_interventions_df"]
     context_figures = data["context_figures"]
+    information_coverage_gaps = data["information_coverage_gaps"]
     numbers_df = data["numbers_df"]
     classification_df = data["classification_df"]
 
@@ -485,10 +630,10 @@ def run(data_folder: str, viz_folder: str) -> None:
     generate_top_priority_interventions(priority_interventions_df, viz_folder)
 
     print("\n--- Generating displacement_numbers ---")
-    generate_displacement_numbers(numbers_df, viz_folder)
+    generate_displacement_numbers(numbers_df, viz_folder, country)
 
     print("\n--- Generating final_numbers ---")
-    generate_final_numbers(numbers_df, viz_folder)
+    generate_final_numbers(numbers_df, viz_folder, country)
 
     print("\n--- Generating top_5_sources ---")
     generate_top_5_sources(answers_df, classification_df, viz_folder)
@@ -496,21 +641,19 @@ def run(data_folder: str, viz_folder: str) -> None:
     print("\n--- Generating output_context_risks ---")
     generate_output_context_risks(context_figures, viz_folder)
 
+    print("\n--- Generating information_coverage ---")
+    generate_information_coverage(context_figures, information_coverage_gaps, viz_folder)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--data-folder",
-        default="data/WestAsia2026/analysis/Lebanon/",
-        help="Path to the analysis data folder",
-    )
-    parser.add_argument(
-        "--viz-folder",
-        default="src/viz/LebanLebanon_src/",
-        help="Output folder for JS visualisation files",
-    )
+    parser.add_argument("--country", type=str, default="Lebanon")
     args = parser.parse_args()
-    run(data_folder=args.data_folder, viz_folder=args.viz_folder)
+    run(
+        data_folder=f"data/WestAsia2026/analysis/{args.country}/",
+        viz_folder=f"src/viz/{args.country}_src/",
+        country=args.country,
+    )
 
 
 if __name__ == "__main__":

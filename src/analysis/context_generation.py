@@ -18,6 +18,8 @@ return a JSON object with the following keys:
 - "key_risks": a list of key risks identified in the country over the past 1-2 years with the following keys:
   - "risk": the name of the risk
   - "risk_score": a score from 0 to 10 indicating the severity of the risk and its impact on the current situation
+- "information_gaps": a list of bullet points describing the information gaps (the questions that are not answered)
+- "information_coverage": a score from 0 to 10 indicating the coverage of the information returned by the questions. The score is 10 if all the questions are answered and 0 if none of the questions are answered.
 """
 
 base_answer = {

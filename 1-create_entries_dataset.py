@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--sample_bool", type=str, default="true")
-    parser.add_argument("--project_name", type=str, default="Sudan2026")
+    parser.add_argument("--project_name", type=str, default="WestAsia2026")
     parser.add_argument("--text_column", type=str, default="text")
     parser.add_argument("--entries_column", type=str, default="Extraction Text")
     parser.add_argument(
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--prediction_ratio", type=float, default=1.05)
     parser.add_argument(
-        "--countries_to_analyze", type=str, nargs="+", default="Sudan"
+        "--countries_to_analyze", type=str, nargs="+", default="Lebanon"
     )
     parser.add_argument("--n_kept_entries", type=int, default=12)
     parser.add_argument("--answers_save_path", type=str, default="answers.json")

@@ -1,34 +1,32 @@
 window.OUTPUT_CONTEXT_RISKS_DATA = {
   "Demographics": [
-    "Population volatility due to displacement and returns"
+    "Population estimate uncertainty (no recent census)",
+    "Large, rapidly changing refugee and returnee flows (Syrians)"
   ],
   "Political": [
-    "Hezbollah’s military and political influence (parallel authority)"
+    "Hezbollah's armed independence vs. state monopoly on force",
+    "Economic collapse and banking/financial instability",
+    "Spillover from Israel–Hezbollah conflict / regional escalation"
   ],
   "Economy": [
-    "Banking / financial sector collapse and depositor losses",
-    "High inflation and food‑security / rising cost of basic goods",
-    "Currency and foreign‑exchange instability (fx shortages, multiple exchange rates)"
+    "Currency instability and inflation"
   ],
   "Socio culture": [
-    "Economic collapse driving child labour and school dropout"
+    "Gender-based violence and limited access to GBV services",
+    "Economic hardship driving child labour, early marriage and school dropout"
   ],
   "Security": [
-    "Cross‑border/high‑intensity hostilities (Israel–Hezbollah)",
-    "Presence and operations of Hezbollah (armed non‑state actor, designated by some states)"
+    "Israel–Hezbollah escalation / cross‑border hostilities"
   ],
   "Legal and policy": [
-    "Restricted legal status and service access for refugees (Syrian, Palestinian)",
-    "Exploitation and lack of remedies for migrant domestic workers (kafala)"
+    "Sectarian fragmentation of personal status law (legal inequality by sect)",
+    "Discrimination and restricted rights for non-citizen groups (Palestinians, Syrians) and migrant workers (kafala)"
   ],
   "Infrastructure & technology": [
-    "Electricity supply failure / fuel shortages"
+    "Electricity supply failure / fuel shortages",
+    "Banking-sector liquidity constraints and de facto capital controls"
   ],
   "Environment": [
-    "Air pollution (PM2.5 and combustion emissions, including diesel generators)"
-  ],
-  "Humanitarian Coordination": [
-    "Funding shortfall for humanitarian response",
-    "Large‑scale displacement and secondary displacement (IDPs and refugee movements)"
+    "Soil contamination from munitions, heavy metals, white phosphorus and reported herbicide spraying in conflict zones"
   ]
 };

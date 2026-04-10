@@ -156,6 +156,7 @@ def _extract_numbers(classification_df: pd.DataFrame) -> pd.DataFrame:
         default_response=[],
         api_key=openai_api_key,
         api_pipeline="OpenAI",
+        additional_progress_bar_description="numbers extraction",
     )
 
     final_entry_df = pd.DataFrame()

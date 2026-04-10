@@ -21,6 +21,8 @@ answer_default_response = {
     "key_indicator_numbers": [],
     "priority_needs": [],
     "priority_interventions": [],
+    "information_gaps": [],
+    "information_coverage": 0,
 }
 
 documents_based_analysis_system_prompt = """
@@ -63,6 +65,9 @@ Return the answer as a JSON dictionary with the following keys:
 - priority_interventions: a list of recommended interventions, each with the following keys:
   - priority_intervention: from the list of risks and priority needs, name of the recommended intervention, keeping it detailed and specific but not more than 2 sentences.
   - priority_intervention_score: integer 0–10 indicating the severity of the recommended intervention (same scale as above)
+
+- "information_gaps": a list of bullet points describing the information gaps (the questions that are not answered)
+- "information_coverage": a score from 0 to 10 indicating the coverage of the information returned by the questions. The score is 10 if all the questions are answered and 0 if none of the questions are answered.
 
 Rules:
 - Base your answers strictly on the provided extracts. Do not infer, extrapolate, or combine facts not explicitly stated together in the source material.
@@ -231,14 +236,15 @@ def _perform_documents_based_analysis(
     key_indicator_numbers_save_path: str = "key_indicator_numbers.json",
     priority_needs_save_path: str = "priority_needs.json",
     priority_interventions_save_path: str = "priority_interventions.json",
+    information_coverage_gaps_save_path: str = "information_coverage_gaps.json",
 ):
     answers_save_path = os.path.join(save_folder, answers_save_path)
     risk_list_save_path = os.path.join(save_folder, risk_list_save_path)
     key_indicator_numbers_save_path = os.path.join(save_folder, key_indicator_numbers_save_path)
     priority_needs_save_path = os.path.join(save_folder, priority_needs_save_path)
     priority_interventions_save_path = os.path.join(save_folder, priority_interventions_save_path)
-
-    if os.path.exists(answers_save_path) and os.path.exists(risk_list_save_path) and os.path.exists(key_indicator_numbers_save_path) and os.path.exists(priority_needs_save_path) and os.path.exists(priority_interventions_save_path):
+    information_coverage_gaps_save_path = os.path.join(save_folder, information_coverage_gaps_save_path)
+    if os.path.exists(answers_save_path) and os.path.exists(risk_list_save_path) and os.path.exists(key_indicator_numbers_save_path) and os.path.exists(priority_needs_save_path) and os.path.exists(priority_interventions_save_path) and os.path.exists(information_coverage_gaps_save_path):
         return
 
     os.makedirs(save_folder, exist_ok=True)
@@ -270,6 +276,7 @@ def _perform_documents_based_analysis(
     priority_interventions_df = analysis_df[
         ["task", "pillar", "subpillar", "sector"]
     ].copy()
+    information_coverage_gaps_df = analysis_df[["task", "pillar", "subpillar", "sector"]].copy()
 
     risk_list_df["risk_list"] = [answer["risk_list"] for answer in answers]
     key_indicator_numbers_df["key_indicator_numbers"] = [
@@ -280,6 +287,12 @@ def _perform_documents_based_analysis(
     ]
     priority_interventions_df["priority_interventions"] = [
         answer["priority_interventions"] for answer in answers
+    ]
+    information_coverage_gaps_df["information_coverage"] = [
+        answer["information_coverage"] for answer in answers
+    ]
+    information_coverage_gaps_df["information_gaps"] = [
+        answer["information_gaps"] for answer in answers
     ]
 
     risk_list_df = risk_list_df.explode("risk_list")
@@ -366,4 +379,10 @@ def _perform_documents_based_analysis(
         orient="records",
         indent=4,
     )
+    information_coverage_gaps_df.to_json(
+        information_coverage_gaps_save_path,
+        orient="records",
+        indent=4,
+    )
+    
     # return answer_df, risk_list_df, key_indicator_numbers_df

@@ -21,24 +21,52 @@
 
         .header {
             background: white;
-            border-bottom: 1px solid #d1d5db;
-            padding: 12px 20px 0;
+            border-bottom: 3px solid #E83231;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
+            display: flex;
+            align-items: stretch;
         }
 
         .header-content {
+            flex: 1;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 12px 20px 0;
         }
 
         .header-top-row {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+        }
+
+        .nrc-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 0 20px;
+            border-left: 1px solid #f0f0f0;
+        }
+
+        .nrc-logo img {
+            height: auto;
+            max-height: 100px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .nrc-logo-wordmark {
+            font-size: 9px;
+            color: #6b7280;
+            letter-spacing: 0.03em;
+            margin-top: 2px;
+            white-space: nowrap;
         }
 
         .header-title {
@@ -99,7 +127,7 @@
         }
 
         .country-button.active {
-            background: #2563eb;
+            background: #E83231;
             color: white;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         }
@@ -130,8 +158,8 @@
         }
 
         .tab-button.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
+            color: #E83231;
+            border-bottom-color: #E83231;
         }
 
         .container {
@@ -181,7 +209,7 @@
             font-size: 32px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #dc2626;
+            color: #E83231;
         }
 
         .metric-value.severe {
@@ -190,7 +218,7 @@
 
         .metric-change {
             font-size: 12px;
-            color: #dc2626;
+            color: #E83231;
         }
 
         .metric-change.severe {
@@ -208,7 +236,7 @@
 
         .progress-fill {
             height: 100%;
-            background-color: #dc2626;
+            background-color: #E83231;
             width: 75%;
         }
 
@@ -281,7 +309,7 @@
         .context-box {
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #2563eb;
+            border-left: 4px solid #002D62;
         }
 
         .context-box.warning {
@@ -290,8 +318,8 @@
         }
 
         .context-box.info {
-            border-left-color: #3b82f6;
-            background: #dbeafe;
+            border-left-color: #002D62;
+            background: #e8eef7;
         }
 
         .context-box h3 {
@@ -366,7 +394,7 @@
 
         .sector-progress-fill {
             height: 100%;
-            background: #dc2626;
+            background: #E83231;
             width: 90%;
         }
 
@@ -695,7 +723,7 @@
         .key-number-value {
             font-size: 26px;
             font-weight: 800;
-            color: #dc2626;
+            color: #E83231;
             line-height: 1.1;
             margin-bottom: 4px;
         }
@@ -764,7 +792,7 @@
 
         .sector-color-health       { background: #dc2626; }
         .sector-color-shelter      { background: #7c3aed; }
-        .sector-color-education    { background: #2563eb; }
+        .sector-color-education    { background: #002D62; }
         .sector-color-protection   { background: #d97706; }
         .sector-color-food         { background: #16a34a; }
         .sector-color-wash         { background: #0891b2; }
@@ -775,10 +803,230 @@
         .sector-color-shock        { background: #374151; }
         .sector-color-default      { background: #4b5563; }
 
+        /* ── Information Coverage page ────────────────────────────── */
+        .ic-summary {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 24px;
+            align-items: center;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        }
+        .ic-score-ring {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .ic-score-ring .ic-score-val { font-size: 30px; line-height: 1; }
+        .ic-score-ring .ic-score-denom { font-size: 12px; opacity: .65; font-weight: 600; }
+        .ic-summary-meta { display: flex; flex-direction: column; gap: 4px; }
+        .ic-summary-title { font-size: 17px; font-weight: 700; color: #1f2937; }
+        .ic-summary-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .ic-tag {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* Section headers */
+        .ic-section-heading {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #E83231;
+        }
+
+        /* Tables */
+        .ic-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            overflow: visible;
+        }
+        .ic-table th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: #6b7280;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        .ic-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .ic-table tr:last-child td { border-bottom: none; }
+        .ic-table tbody tr:hover td { background: #f9fafb; }
+        .ic-cell-pillar  { font-weight: 600; color: #1f2937; font-size: 13px; }
+        .ic-cell-sub     { font-size: 12.5px; color: #374151; }
+        .ic-cell-sector  { font-size: 12.5px; color: #374151; }
+
+        /* Score cell */
+        .ic-score-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .ic-score-pill {
+            padding: 3px 9px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .ic-mini-bar {
+            width: 52px;
+            height: 5px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .ic-mini-bar-fill { height: 100%; border-radius: 3px; }
+
+        /* Gap tooltip */
+        .ic-gap-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .ic-gap-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4b5563;
+            cursor: default;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .ic-gap-pill:hover { background: #e5e7eb; }
+        .ic-gap-tooltip {
+            display: none;
+            position: absolute;
+            top: calc(100% + 7px);
+            right: 0;
+            background: #1f2937;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            width: 340px;
+            z-index: 999;
+            box-shadow: 0 6px 20px rgba(0,0,0,.3);
+            line-height: 1.5;
+            text-align: left;
+        }
+        .ic-gap-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            right: 18px;
+            border: 6px solid transparent;
+            border-bottom-color: #1f2937;
+        }
+        .ic-gap-wrapper:hover .ic-gap-tooltip { display: block; }
+        .ic-gap-tooltip-title {
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+        .ic-gap-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #374151;
+            font-size: 11.5px;
+            line-height: 1.5;
+        }
+        .ic-gap-item::before { content: '· '; color: #6b7280; }
+        .ic-gap-item:last-child { border-bottom: none; }
+
+        /* Print: inline gaps, hide pill trigger */
+        @media print {
+            .ic-gap-pill { display: none !important; }
+            .ic-gap-tooltip {
+                display: block !important;
+                position: static !important;
+                background: transparent !important;
+                color: #1f2937 !important;
+                padding: 3px 0 0 !important;
+                box-shadow: none !important;
+                width: auto !important;
+                border-radius: 0 !important;
+                font-size: 7pt !important;
+            }
+            .ic-gap-tooltip::before { display: none !important; }
+            .ic-gap-tooltip-title { color: #6b7280 !important; margin-bottom: 2px !important; font-size: 6.5pt !important; }
+            .ic-gap-item {
+                border-bottom-color: #e5e7eb !important;
+                padding: 1px 0 !important;
+                font-size: 7pt !important;
+                line-height: 1.3 !important;
+            }
+            .ic-gap-wrapper { display: block !important; }
+            .ic-table { font-size: 7.5pt !important; table-layout: fixed !important; width: 100% !important; }
+            .ic-table td, .ic-table th { padding: 4px 7px !important; font-size: 7.5pt !important; }
+            .ic-table th { font-size: 6.5pt !important; letter-spacing: 0 !important; }
+            .ic-cell-pillar { font-size: 7.5pt !important; }
+            .ic-cell-sub, .ic-cell-sector { font-size: 7pt !important; }
+            .ic-score-pill { font-size: 7pt !important; padding: 1px 5px !important; }
+            .ic-score-cell { gap: 4px !important; }
+            .ic-mini-bar { display: none !important; }
+            .ic-summary { padding: 12px 16px !important; margin-bottom: 16px !important; }
+            .ic-score-ring { width: 64px !important; height: 64px !important; }
+            .ic-score-ring .ic-score-val { font-size: 20px !important; }
+            .ic-summary-title { font-size: 12pt !important; }
+            .ic-section-heading { font-size: 11pt !important; margin-bottom: 8px !important; }
+        }
+
+        /* Score colour helpers */
+        .ic-color-critical { background: #fef2f2; color: #dc2626; }
+        .ic-color-low      { background: #fff7ed; color: #ea580c; }
+        .ic-color-moderate { background: #fefce8; color: #ca8a04; }
+        .ic-color-good     { background: #e8eef7; color: #002D62; }
+        .ic-color-high     { background: #f0fdf4; color: #16a34a; }
+        .ic-bar-critical   { background: #dc2626; }
+        .ic-bar-low        { background: #ea580c; }
+        .ic-bar-moderate   { background: #ca8a04; }
+        .ic-bar-good       { background: #002D62; }
+        .ic-bar-high       { background: #16a34a; }
+
         .print-btn {
             margin-left: auto;
             padding: 5px 13px;
-            background: #2563eb;
+            background: #E83231;
             color: white;
             border: none;
             border-radius: 6px;
@@ -788,19 +1036,19 @@
             align-self: center;
             transition: background 0.2s;
         }
-        .print-btn:hover { background: #1d4ed8; }
+        .print-btn:hover { background: #CC1F1E; }
 
         .print-section-header { display: none; }
 
         @media print {
-            body { background: white !important; padding-bottom: 0 !important; }
+            body { background: white !important; padding-bottom: 0 !important; font-size: 9pt !important; }
 
-            .header { position: static !important; box-shadow: none !important; }
+            .header { position: static !important; box-shadow: none !important; border-bottom: 2px solid #E83231 !important; padding: 8px 16px 0 !important; }
             .tabs, .country-switcher, .print-btn { display: none !important; }
             .footer { display: none !important; }
-            .container { margin-top: 16px !important; }
+            .container { margin-top: 10px !important; padding: 0 12px !important; }
 
-            /* Show only the three exported tabs */
+            /* Show only the exported tabs */
             .tab-content { display: none !important; }
             .tab-content.print-visible { display: block !important; }
             .tab-content.print-visible ~ .tab-content.print-visible { page-break-before: always; }
@@ -808,13 +1056,17 @@
             /* Per-section heading */
             .print-section-header {
                 display: block;
-                font-size: 16pt;
+                font-size: 13pt;
                 font-weight: bold;
-                margin-bottom: 16px;
-                padding-bottom: 8px;
-                border-bottom: 2px solid #2563eb;
+                margin-bottom: 10px;
+                padding-bottom: 6px;
+                border-bottom: 2px solid #E83231;
                 color: #1f2937;
             }
+
+            /* Compact cards */
+            .card { padding: 12px !important; margin-bottom: 12px !important; box-shadow: none !important; }
+            .metric-card { padding: 10px !important; }
 
             /* Avoid breaking inside cards */
             .metric-card, .card, .scenario-card,
@@ -822,6 +1074,24 @@
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
+
+            /* Sector table compact */
+            .sector-table th, .sector-table td { padding: 5px 7px !important; font-size: 7.5pt !important; }
+            .sector-table td:first-child { font-size: 8pt !important; }
+            .badge { padding: 2px 6px !important; font-size: 6.5pt !important; }
+
+            /* Key numbers compact */
+            .key-number-value { font-size: 16px !important; }
+            .key-number-unit { font-size: 8pt !important; }
+            .key-number-label { font-size: 7.5pt !important; }
+            .key-numbers-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; gap: 6px !important; }
+            .key-number-card { padding: 8px 10px !important; }
+
+            /* Sector intervention cards */
+            .sector-cards-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; gap: 8px !important; }
+            .sector-intervention-header { padding: 6px 10px !important; font-size: 8pt !important; }
+            .sector-intervention-body { padding: 8px 10px !important; }
+            .sector-intervention-body ul { font-size: 7.5pt !important; line-height: 1.5 !important; }
 
             /* Expand tooltip risk details inline */
             .tooltip-wrapper { position: static !important; display: inline-block !important; }
@@ -832,15 +1102,28 @@
                 color: #1f2937 !important;
                 width: auto !important;
                 box-shadow: none !important;
-                padding: 4px 6px !important;
-                margin-top: 4px !important;
-                font-size: 7.5pt !important;
+                padding: 3px 5px !important;
+                margin-top: 3px !important;
+                font-size: 7pt !important;
                 line-height: 1.4 !important;
                 border-radius: 4px !important;
                 text-align: left !important;
             }
             .tooltip-content::after { display: none !important; }
-            .tooltip-title { color: #6b7280 !important; }
+            .tooltip-title { color: #6b7280 !important; font-size: 6.5pt !important; }
+            .tooltip-risk { font-size: 7pt !important; padding: 2px 0 !important; }
+
+            /* Context boxes */
+            .context-box { padding: 10px 12px !important; }
+            .context-box ul { font-size: 8pt !important; line-height: 1.6 !important; }
+
+            /* Metrics */
+            .metric-value { font-size: 20px !important; }
+            .metric-label { font-size: 8pt !important; }
+            .metrics-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 10px !important; margin-bottom: 16px !important; }
+
+            /* NRC logo in print */
+            .nrc-logo { display: flex !important; }
         }
     </style>
     <!-- SECTORS_DATA_START -->
@@ -877,6 +1160,9 @@
     <!-- OUTPUT_CONTEXT_RISKS_DATA_START -->
     <script src="Lebanon_src/output_context_risks_data.js"></script>
     <!-- OUTPUT_CONTEXT_RISKS_DATA_END -->
+    <!-- INFORMATION_COVERAGE_DATA_START -->
+    <script src="Lebanon_src/information_coverage_data.js"></script>
+    <!-- INFORMATION_COVERAGE_DATA_END -->
 </head>
 
 <body>
@@ -902,8 +1188,12 @@
                 <button class="tab-button" onclick="switchTab('sectors')">🏢 Sectors</button>
                 <!-- <button class="tab-button" onclick="switchTab('response')">🆘 Response Gap</button> -->
                 <button class="tab-button" onclick="switchTab('scenarios')">🔮 Response Planning</button>
+                <button class="tab-button" onclick="switchTab('info-coverage')">📋 Info Coverage</button>
                 <button class="print-btn" onclick="printDashboard()">⬇ Export PDF</button>
             </div>
+        </div>
+        <div class="nrc-logo">
+            <img src="img/Norwegian_Refugee_Council_ENG_logo.gif" alt="Norwegian Refugee Council" height="80" style="display:block;">
         </div>
     </div>
 
@@ -986,7 +1276,7 @@
 
         <!-- SECTORS TAB -->
         <div id="sectors" class="tab-content">
-            <div class="print-section-header">🏢 Sector Analysis</div>
+            <div class="print-section-header">🏢 Sectoral Analysis</div>
             <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">🏢 Sector-wise Analysis
             </h2>
 
@@ -1191,6 +1481,77 @@
                 </ul>
             </div> -->
 
+        </div>
+
+        <!-- INFORMATION COVERAGE TAB -->
+        <div id="info-coverage" class="tab-content">
+            <div class="print-section-header">📋 Information Coverage &amp; Gaps</div>
+            <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">📋 Information Coverage &amp; Gaps</h2>
+
+            <!-- Summary card -->
+            <div class="ic-summary">
+                <div class="ic-score-ring" id="ic-ring">
+                    <span class="ic-score-val" id="ic-overall-val">—</span>
+                    <span class="ic-score-denom">/10</span>
+                </div>
+                <div class="ic-summary-meta">
+                    <div class="ic-summary-title">Overall Information Coverage Score</div>
+                    <div style="font-size:12px;color:#6b7280;margin-top:3px;">Mean across all scored context &amp; situation-analysis entries. Hover any row's gap pill to see identified gaps; gaps are printed in full on export.</div>
+                    <div class="ic-summary-tags" id="ic-summary-tags"></div>
+                </div>
+            </div>
+
+            <!-- Section 1: Operational Framework (no sector) -->
+            <h2 class="ic-section-heading" style="margin-top:4px;">📂 Operational Framework</h2>
+            <div class="card" style="padding:0;overflow:visible;">
+                <table class="ic-table" style="table-layout:fixed;">
+                    <colgroup>
+                        <col style="width:18%">
+                        <col style="width:32%">
+                        <col style="width:18%">
+                        <col style="width:32%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Pillar</th>
+                            <th>Sub-pillar</th>
+                            <th>Coverage</th>
+                            <th>Information Gaps</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ic-operational-tbody">
+                        <tr><td colspan="4" style="color:#9ca3af;text-align:center;padding:20px;">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="height:28px;"></div>
+
+            <!-- Section 2: Sectoral Analysis -->
+            <h2 class="ic-section-heading">🏢 Sectoral Analysis</h2>
+            <div class="card" style="padding:0;overflow:visible;">
+                <table class="ic-table" style="table-layout:fixed;">
+                    <colgroup>
+                        <col style="width:16%">
+                        <col style="width:28%">
+                        <col style="width:14%">
+                        <col style="width:16%">
+                        <col style="width:26%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Pillar</th>
+                            <th>Sub-pillar</th>
+                            <th>Sector</th>
+                            <th>Coverage</th>
+                            <th>Information Gaps</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ic-sector-tbody">
+                        <tr><td colspan="5" style="color:#9ca3af;text-align:center;padding:20px;">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -1438,10 +1799,17 @@
             const data = window.FINAL_NUMBERS_DATA;
             if (!data || data.length === 0) return;
 
-            const colorMap = { killed: '#dc2626', injured: '#f97316', displaced: '#2563eb' };
+            const colorMap = { killed: '#E83231', injured: '#f97316', displaced: '#002D62' };
             const labelMap = { killed: 'People Killed', injured: 'People Injured', displaced: 'People Displaced' };
 
-            grid.innerHTML = data.map(item => {
+            const sortOrder = ["affected", "in need", "at risk", "displaced", "killed", "injured"];
+            const sorted = [...data].sort((a, b) => {
+                const ai = sortOrder.indexOf(a.what_happened);
+                const bi = sortOrder.indexOf(b.what_happened);
+                return (ai === -1 ? sortOrder.length : ai) - (bi === -1 ? sortOrder.length : bi);
+            });
+
+            grid.innerHTML = sorted.map(item => {
                 const key   = item.what_happened;
                 const color = colorMap[key] || '#374151';
                 const label = labelMap[key] || (key ? key.charAt(0).toUpperCase() + key.slice(1) : item.unit);
@@ -1484,7 +1852,7 @@
                 return `
                     <div class="card">
                         <div class="status-label">${label}</div>
-                        <div style="font-size:28px;font-weight:bold;color:#dc2626;margin:10px 0;">${fmtMetric(item.number)}</div>
+                        <div style="font-size:28px;font-weight:bold;color:#E83231;margin:10px 0;">${fmtMetric(item.number)}</div>
                         <p style="font-size:13px;color:#6b7280;">${item.unit}</p>
                     </div>`;
             }).join('');
@@ -1545,7 +1913,7 @@
         
 
         // ── PDF Export ──────────────────────────────────────────────
-        const PRINT_TABS = ['overview', 'sectors', 'scenarios'];
+        const PRINT_TABS = ['overview', 'sectors', 'scenarios', 'info-coverage'];
 
         window.addEventListener('beforeprint', function () {
             PRINT_TABS.forEach(id => {
@@ -1562,6 +1930,159 @@
             window.print();
         }
         // ────────────────────────────────────────────────────────────
+
+        // ── Information Coverage ─────────────────────────────────────────────
+        function icScoreClass(s) {
+            if (s <= 3) return 'critical';
+            if (s <= 5) return 'low';
+            if (s <= 6) return 'moderate';
+            if (s <= 8) return 'good';
+            return 'high';
+        }
+        function icScoreLabel(s) {
+            if (s <= 3) return 'Critical Gap';
+            if (s <= 5) return 'Low';
+            if (s <= 6) return 'Moderate';
+            if (s <= 8) return 'Good';
+            return 'High';
+        }
+        const IC_RING_COLORS = {
+            critical: { bg: '#fef2f2', color: '#dc2626', border: '3px solid #dc2626' },
+            low:      { bg: '#fff7ed', color: '#ea580c', border: '3px solid #ea580c' },
+            moderate: { bg: '#fefce8', color: '#ca8a04', border: '3px solid #ca8a04' },
+            good:     { bg: '#e8eef7', color: '#002D62', border: '3px solid #002D62' },
+            high:     { bg: '#f0fdf4', color: '#16a34a', border: '3px solid #16a34a' },
+        };
+
+        function icGapTooltip(gaps) {
+            if (!gaps || gaps.length === 0) return '<span style="font-size:11px;color:#9ca3af;">—</span>';
+            const items = gaps.map(g => `<div class="ic-gap-item">${g}</div>`).join('');
+            return `
+                <div class="ic-gap-wrapper">
+                    <span class="ic-gap-pill">⚠ ${gaps.length} gap${gaps.length > 1 ? 's' : ''}</span>
+                    <div class="ic-gap-tooltip">
+                        <div class="ic-gap-tooltip-title">Information Gaps</div>
+                        ${items}
+                    </div>
+                </div>`;
+        }
+
+        function icScoreCell(coverage) {
+            const cls = icScoreClass(coverage);
+            const pct = (coverage / 10 * 100).toFixed(0);
+            return `
+                <div class="ic-score-cell">
+                    <span class="ic-score-pill ic-color-${cls}">${coverage}/10</span>
+                    <div class="ic-mini-bar">
+                        <div class="ic-mini-bar-fill ic-bar-${cls}" style="width:${pct}%"></div>
+                    </div>
+                    <span style="font-size:10.5px;color:#9ca3af;">${icScoreLabel(coverage)}</span>
+                </div>`;
+        }
+
+        function buildInfoCoverage() {
+            const data = window.INFORMATION_COVERAGE_DATA;
+            if (!data) return;
+
+            // ── Summary ring ────────────────────────────────────────────
+            const score = data.overall_score || 0;
+            const ring  = document.getElementById('ic-ring');
+            const rc    = IC_RING_COLORS[icScoreClass(score)] || IC_RING_COLORS.good;
+            if (ring) { ring.style.background = rc.bg; ring.style.color = rc.color; ring.style.border = rc.border; }
+            const valEl = document.getElementById('ic-overall-val');
+            if (valEl) valEl.textContent = score.toFixed(1);
+
+            const tagsEl = document.getElementById('ic-summary-tags');
+            if (tagsEl) {
+                const ctxCount = (data.context || []).length;
+                const anaCount = (data.analysis || []).reduce((s, p) => s + p.entries.length, 0);
+                tagsEl.innerHTML = [
+                    `<span class="ic-tag">📂 ${ctxCount} context pillars</span>`,
+                    `<span class="ic-tag">🔍 ${anaCount} analysis entries</span>`,
+                    `<span class="ic-tag">⚠ ${data.total_gaps || 0} gaps identified</span>`,
+                    `<span class="ic-tag ic-color-${icScoreClass(score)}">${icScoreLabel(score)} overall</span>`,
+                ].join('');
+            }
+
+            // ── Build flat row arrays ────────────────────────────────────
+            // Operational Framework: context pillars + analysis entries where sector === "-"
+            const OP_PILLAR_ORDER = ['Context', 'Shock-Event', 'Humanitarian Access', 'Displacement'];
+            const opRows = [];
+            for (const cp of (data.context || [])) {
+                opRows.push({ pillar: cp.pillar, subpillar: '—', coverage: cp.coverage, gaps: cp.gaps });
+            }
+            for (const pillar of (data.analysis || [])) {
+                for (const e of pillar.entries) {
+                    if (!e.sector || e.sector === '-') {
+                        opRows.push({ pillar: pillar.pillar, subpillar: e.subpillar, coverage: e.coverage, gaps: e.gaps });
+                    }
+                }
+            }
+            opRows.sort((a, b) => {
+                const ai = OP_PILLAR_ORDER.indexOf(a.pillar);
+                const bi = OP_PILLAR_ORDER.indexOf(b.pillar);
+                return (ai === -1 ? OP_PILLAR_ORDER.length : ai) - (bi === -1 ? OP_PILLAR_ORDER.length : bi);
+            });
+
+            // Sectoral Analysis: analysis entries where sector !== "-"
+            const secRows = [];
+            for (const pillar of (data.analysis || [])) {
+                for (const e of pillar.entries) {
+                    if (e.sector && e.sector !== '-') {
+                        secRows.push({ pillar: pillar.pillar, subpillar: e.subpillar, sector: e.sector, coverage: e.coverage, gaps: e.gaps });
+                    }
+                }
+            }
+
+            // ── Operational Framework table ──────────────────────────────
+            const opTbody = document.getElementById('ic-operational-tbody');
+            if (opTbody) {
+                if (opRows.length === 0) {
+                    opTbody.innerHTML = '<tr><td colspan="4" style="color:#9ca3af;text-align:center;padding:16px;">No data.</td></tr>';
+                } else {
+                    // Group consecutive same-pillar rows for visual clarity
+                    let prevPillar = null;
+                    opTbody.innerHTML = opRows.map(r => {
+                        const pillarCell = r.pillar !== prevPillar
+                            ? `<td class="ic-cell-pillar" rowspan="1">${r.pillar}</td>`
+                            : `<td class="ic-cell-pillar" style="color:#9ca3af;font-weight:400;">↳</td>`;
+                        prevPillar = r.pillar;
+                        return `<tr>
+                            ${pillarCell}
+                            <td class="ic-cell-sub">${r.subpillar}</td>
+                            <td>${icScoreCell(r.coverage)}</td>
+                            <td>${icGapTooltip(r.gaps)}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            }
+
+            // ── Sectoral Analysis table ────────────────────────────────────
+            const secTbody = document.getElementById('ic-sector-tbody');
+            if (secTbody) {
+                if (secRows.length === 0) {
+                    secTbody.innerHTML = '<tr><td colspan="5" style="color:#9ca3af;text-align:center;padding:16px;">No data.</td></tr>';
+                } else {
+                    let prevPillar = null;
+                    secTbody.innerHTML = secRows.map(r => {
+                        const pillarCell = r.pillar !== prevPillar
+                            ? `<td class="ic-cell-pillar">${r.pillar}</td>`
+                            : `<td class="ic-cell-pillar" style="color:#9ca3af;font-weight:400;">↳</td>`;
+                        prevPillar = r.pillar;
+                        return `<tr>
+                            ${pillarCell}
+                            <td class="ic-cell-sub">${r.subpillar}</td>
+                            <td class="ic-cell-sector">${r.sector}</td>
+                            <td>${icScoreCell(r.coverage)}</td>
+                            <td>${icGapTooltip(r.gaps)}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            }
+        }
+
+        buildInfoCoverage();
+        // ────────────────────────────────────────────────────────────────────
 
         function buildAccessBarriers() {
             const list = document.getElementById('access-barriers-list');
