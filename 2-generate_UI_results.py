@@ -390,7 +390,7 @@ def generate_final_numbers(
     #     & (numbers_df["number"] > 100)
     #     & (numbers_df["start_location"] == country)
     # ]
-    keep_what_happened = ["affected", "in need", "at risk", "displaced", "killed", "injured"]
+    keep_what_happened = ["affected", "in need", "at risk", "displaced"]#, "killed", "injured"]
 
     filtered = numbers_df[
         (

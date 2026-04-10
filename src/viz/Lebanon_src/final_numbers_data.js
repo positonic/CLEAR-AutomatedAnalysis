@@ -8,15 +8,5 @@ window.FINAL_NUMBERS_DATA = [
     "what_happened": "affected",
     "number": 2770000,
     "unit": "people"
-  },
-  {
-    "what_happened": "injured",
-    "number": 2141,
-    "unit": "people"
-  },
-  {
-    "what_happened": "killed",
-    "number": 968,
-    "unit": "people"
   }
 ];

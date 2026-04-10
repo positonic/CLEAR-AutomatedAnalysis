@@ -26,15 +26,19 @@
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             align-items: stretch;
         }
 
         .header-content {
             flex: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 12px 20px 0;
+            padding: 12px 0 0;
         }
 
         .header-top-row {
@@ -50,7 +54,6 @@
             justify-content: center;
             flex-shrink: 0;
             padding: 0 20px;
-            border-left: 1px solid #f0f0f0;
         }
 
         .nrc-logo img {
@@ -136,8 +139,6 @@
             display: flex;
             gap: 6px;
             margin-top: 10px;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 0;
             flex-wrap: wrap;
         }
 
@@ -1167,33 +1168,35 @@
 
 <body>
     <div class="header">
-        <div class="header-content">
-            <div class="header-top-row">
-                <div class="header-title" data-country-field="headerTitle">Lebanon Crisis 2026</div>
-                <div class="header-subtitle" data-country-field="headerSubtitle">Situation Analysis Dashboard • Real-time Data</div>
-            </div>
-            <div class="header-time">Last Data Update: March 21, 2026</div>
+        <div class="header-inner">
+            <div class="header-content">
+                <div class="header-top-row">
+                    <div class="header-title" data-country-field="headerTitle">Lebanon Crisis 2026</div>
+                    <div class="header-subtitle" data-country-field="headerSubtitle">Situation Analysis Dashboard • Real-time Data</div>
+                </div>
+                <div class="header-time">Last Data Update: March 21, 2026</div>
 
-            <div class="country-switcher">
-                <span class="country-switcher-label">Country Focus</span>
-                <div class="country-options">
-                    <button class="country-button active" data-country-key="lebanon"
-                        onclick="switchCountry('lebanon')">Lebanon</button>
+                <div class="country-switcher">
+                    <span class="country-switcher-label">Country Focus</span>
+                    <div class="country-options">
+                        <button class="country-button active" data-country-key="lebanon"
+                            onclick="switchCountry('lebanon')">Lebanon</button>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('overview')">📊 Overview</button>
+                    <!-- <button class="tab-button" onclick="switchTab('displacement')">📍 Displacement</button> -->
+                    <button class="tab-button" onclick="switchTab('sectors')">🏢 Sectors</button>
+                    <!-- <button class="tab-button" onclick="switchTab('response')">🆘 Response Gap</button> -->
+                    <button class="tab-button" onclick="switchTab('scenarios')">🔮 Response Planning</button>
+                    <button class="tab-button" onclick="switchTab('info-coverage')">📋 Info Coverage</button>
+                    <button class="print-btn" onclick="printDashboard()">⬇ Export PDF</button>
                 </div>
             </div>
-
-            <div class="tabs">
-                <button class="tab-button active" onclick="switchTab('overview')">📊 Overview</button>
-                <!-- <button class="tab-button" onclick="switchTab('displacement')">📍 Displacement</button> -->
-                <button class="tab-button" onclick="switchTab('sectors')">🏢 Sectors</button>
-                <!-- <button class="tab-button" onclick="switchTab('response')">🆘 Response Gap</button> -->
-                <button class="tab-button" onclick="switchTab('scenarios')">🔮 Response Planning</button>
-                <button class="tab-button" onclick="switchTab('info-coverage')">📋 Info Coverage</button>
-                <button class="print-btn" onclick="printDashboard()">⬇ Export PDF</button>
+            <div class="nrc-logo">
+                <img src="img/Norwegian_Refugee_Council_ENG_logo.gif" alt="Norwegian Refugee Council" height="80" style="display:block;">
             </div>
-        </div>
-        <div class="nrc-logo">
-            <img src="img/Norwegian_Refugee_Council_ENG_logo.gif" alt="Norwegian Refugee Council" height="80" style="display:block;">
         </div>
     </div>
 
