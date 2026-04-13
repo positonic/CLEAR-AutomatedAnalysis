@@ -39,6 +39,13 @@ dependencies = [
     "humanitarian-extract-classificator",
 ]
 
+[project.scripts]
+clear-create-entries = "cli.create_entries:main"
+clear-generate-ui = "cli.generate_ui:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src", "cli"]
+
 [tool.uv.sources]
 llm-multiprocessing-inference = { git = "https://github.com/MediaMonitoringAndAnalysis/llm_multiprocessing_inference.git" }
 documents-processing = { git = "https://github.com/MediaMonitoringAndAnalysis/DocumentsProcessing.git" }

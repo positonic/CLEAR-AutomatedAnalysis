@@ -86,8 +86,7 @@ def _import_classification_dataset(
     return df
 
 
-if __name__ == "__main__":
-
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sample_bool", type=str, default="true")
     parser.add_argument("--project_name", type=str, default="WestAsia2026")
@@ -182,3 +181,7 @@ if __name__ == "__main__":
         )
 
         generate_context(country, os.path.join(save_folder, country, "context_figures.json"))
+
+
+if __name__ == "__main__":
+    main()
