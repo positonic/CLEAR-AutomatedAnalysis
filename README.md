@@ -8,7 +8,7 @@
 
 ```mermaid
 flowchart LR
-    A([ReliefWeb\nDocuments & PDFs]) --> B[1-create_entries_dataset.py]
+    A([ReliefWeb\nDocuments & PDFs]) --> B[clear-create-entries\ncli/create_entries.py]
     B --> C[(classification_dataset.csv)]
     C --> D[LLM Analysis\ndocuments_based_analysis.py]
     C --> E[Numbers Extraction\nnumbers_extraction.py]
@@ -16,7 +16,7 @@ flowchart LR
     D --> G[(answers.json\nrisk_list.json\nkey_indicator_numbers.json\npriority_needs.json\npriority_interventions.json)]
     E --> H[(numbers_extraction.csv)]
     F --> I[(context_figures.json)]
-    G & H & I --> J[2-generate_UI_results.py]
+    G & H & I --> J[clear-generate-ui\ncli/generate_ui.py]
     J --> K[(JS data files\nsrc/viz/)]
     K --> L([iran_crisis_dashboard.html\nInteractive Dashboard])
 ```
@@ -178,8 +178,9 @@ The dashboard supports **country switching** (Lebanon / Iran) and a **one-click 
 
 ```
 CLEAR-AutomatedAnalysis/
-├── 1-create_entries_dataset.py      # Stage 1: data ingestion & analysis
-├── 2-generate_UI_results.py         # Stage 2: dashboard data generation
+├── cli/
+│   ├── create_entries.py            # Stage 1: data ingestion & analysis  →  uv run clear-create-entries
+│   └── generate_ui.py               # Stage 2: dashboard data generation  →  uv run clear-generate-ui
 │
 ├── src/
 │   ├── analysis/
@@ -215,10 +216,16 @@ CLEAR-AutomatedAnalysis/
 
 **Prerequisites:** set `openai_api_key` in a `.env` file at the repo root.
 
+Install dependencies with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv sync
+```
+
 ### Stage 1 — Build the analysis dataset
 
 ```bash
-python 1-create_entries_dataset.py \
+uv run clear-create-entries \
   --project_name WestAsia2026 \
   --countries_to_analyze Lebanon \
   --n_kept_entries 12 \
@@ -237,9 +244,7 @@ Each sub-step is **idempotent** — if the output file already exists it is skip
 ### Stage 2 — Generate dashboard data
 
 ```bash
-python 2-generate_UI_results.py \
-  --data-folder data/WestAsia2026/analysis/Lebanon/ \
-  --viz-folder src/viz/
+uv run clear-generate-ui --country Lebanon
 ```
 
 ### View the dashboard

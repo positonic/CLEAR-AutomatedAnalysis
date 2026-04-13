@@ -2,7 +2,7 @@
 Generate final dashboard visualisation data from CLEAR analysis outputs.
 
 Usage:
-    python generate_final_results.py [--data-folder DATA_FOLDER] [--viz-folder VIZ_FOLDER]
+    uv run clear-generate-ui [--country COUNTRY]
 
 Defaults:
     --country  Lebanon
