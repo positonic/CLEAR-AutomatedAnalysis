@@ -40,11 +40,15 @@ dependencies = [
 ]
 
 [project.scripts]
-clear-create-entries = "cli.create_entries:main"
-clear-generate-ui = "cli.generate_ui:main"
+clear-create-report-data = "cli.create_report_data:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src", "cli"]
+
+[tool.uv]
+override-dependencies = [
+    "onnxruntime-silicon==1.16.3; sys_platform == 'darwin' and platform_machine == 'arm64' and platform_release >= '23.0.0'",
+]
 
 [tool.uv.sources]
 llm-multiprocessing-inference = { git = "https://github.com/MediaMonitoringAndAnalysis/llm_multiprocessing_inference.git" }
