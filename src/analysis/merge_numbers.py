@@ -11,10 +11,6 @@ QUANTIFIER_PREFERENCE = [
     "Less Than",
 ]
 
-# Ordered preference for units (most preferred first)
-UNIT_PREFERENCE = ["people", "persons", "individuals", "civilians", "families", "households", "children"]
-
-
 def _pick_preferred(values: list[str], preference: list[str], fallback_strategy="most_common") -> str:
     """
     Pick the best value from a list based on an ordered preference list.
@@ -67,11 +63,37 @@ def _pick_most_common_non_null(values: list[str]) -> str:
     return Counter(non_null).most_common(1)[0][0]
 
 
+def _pick_max_number(values: list) -> int | str:
+    """Return the highest numeric value, or '-' if none are valid."""
+    valid_numbers = []
+    for value in values:
+        if value in (None, "-"):
+            continue
+        try:
+            valid_numbers.append(float(value))
+        except (TypeError, ValueError):
+            continue
+
+    if not valid_numbers:
+        return "-"
+
+    max_value = max(valid_numbers)
+    return int(max_value) if max_value.is_integer() else max_value
+
+
+def _pick_row_with_max_number(group: pd.DataFrame) -> pd.Series:
+    """Return the row with the highest valid numeric `number`."""
+    numeric_numbers = pd.to_numeric(group["number"], errors="coerce")
+    if numeric_numbers.notna().any():
+        return group.loc[numeric_numbers.idxmax()]
+    return group.iloc[0]
+
+
 def merge_entries_by_number(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Merge rows with the same `number` value by applying the following rules:
-      - unit:               prefer "people", then common person-type units, else most common
-      - what_happened:      most common non-null value
+    Merge rows by `what_happened` type and keep only the highest `number` per type:
+      - number/unit:        taken from the row with the highest valid number in the type
+      - what_happened:      group key
       - start_date:         earliest valid date; start_date_precision follows it
       - end_date:           latest valid date;   end_date_precision follows it
       - start_location:     most common non-null value
@@ -84,11 +106,13 @@ def merge_entries_by_number(df: pd.DataFrame) -> pd.DataFrame:
     df = df.fillna("-")
 
     rows = []
-    for number, group in df.groupby("number", sort=False):
-        merged: dict = {"number": number}
-
-        merged["unit"] = _pick_preferred(group["unit"].tolist(), UNIT_PREFERENCE)
-        merged["what_happened"] = _pick_most_common_non_null(group["what_happened"].tolist())
+    for what_happened, group in df.groupby("what_happened", sort=False):
+        max_row = _pick_row_with_max_number(group)
+        merged: dict = {
+            "number": _pick_max_number(group["number"].tolist()),
+            "unit": max_row["unit"] if pd.notna(max_row["unit"]) and max_row["unit"] != "-" else "-",
+            "what_happened": what_happened,
+        }
 
         merged["start_date"], merged["start_date_precision"] = _pick_min_date(
             group["start_date"].tolist(),

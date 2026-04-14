@@ -1127,43 +1127,55 @@
             .nrc-logo { display: flex !important; }
         }
     </style>
-    <!-- SECTORS_DATA_START -->
+    <!-- DATA STORE HELPER -->
+    <script>
+        window._DATA_STORE = {};
+        const _DATA_VARS = [
+            'SHOWN_RISKS_DATA', 'KEY_NUMBERS_DATA', 'TOP_PRIORITY_INTERVENTIONS_DATA',
+            'TOP_SECTORAL_NEEDS_DATA', 'FINAL_NUMBERS_DATA', 'OUTPUT_CONTEXT_RISKS_DATA',
+            'DISPLACEMENT_DATA', 'DISPLACEMENT_RISKS_DATA', 'TOP_5_SOURCES_DATA',
+            'CURRENT_HAZARDS_AND_THREATS_DATA', 'PRECRISIS_VULNERABILITIES_DATA',
+            'INFORMATION_COVERAGE_DATA', 'HUMANITARIAN_ACCESS_DATA'
+        ];
+        window._captureData = function () {
+            const store = {};
+            _DATA_VARS.forEach(v => { store[v] = window[v]; });
+            return store;
+        };
+        window._restoreData = function (store) {
+            _DATA_VARS.forEach(v => { window[v] = store ? store[v] : undefined; });
+        };
+    </script>
+    <!-- LEBANON DATA -->
     <script src="Lebanon_src/shown_risks_data.js"></script>
-    <!-- SECTORS_DATA_END -->
-    <!-- HUMANITARIAN_ACCESS_DATA_START -->
     <script src="Lebanon_src/humanitarian_access_data.js"></script>
-    <!-- HUMANITARIAN_ACCESS_DATA_END -->
-    <!-- KEY_SECTOR_NUMBERS_DATA_START -->
     <script src="Lebanon_src/key_sector_numbers_data.js"></script>
-    <!-- KEY_SECTOR_NUMBERS_DATA_END -->
-    <!-- PRECRISIS_DATA_START -->
     <script src="Lebanon_src/precrisis_vulnerabilities_data.js"></script>
-    <!-- PRECRISIS_DATA_END -->
-    <!-- CURRENT_HAZARDS_AND_THREATS_DATA_START -->
     <script src="Lebanon_src/current_hazards_and_threats_data.js"></script>
-    <!-- CURRENT_HAZARDS_AND_THREATS_DATA_END -->
-    <!-- DISPLACEMENT_DATA_START -->
     <script src="Lebanon_src/displacement_data.js"></script>
     <script src="Lebanon_src/displacement_risks_data.js"></script>
-    <!-- DISPLACEMENT_DATA_END -->
-    <!-- FINAL_NUMBERS_DATA_START -->
     <script src="Lebanon_src/final_numbers_data.js"></script>
-    <!-- FINAL_NUMBERS_DATA_END -->
-    <!-- INTERVENTIONS_DATA_START -->
     <script src="Lebanon_src/top_priority_interventions_data.js"></script>
-    <!-- INTERVENTIONS_DATA_END -->
-    <!-- SECTORAL_NEEDS_DATA_START -->
     <script src="Lebanon_src/top_sectoral_needs_data.js"></script>
-    <!-- SECTORAL_NEEDS_DATA_END -->
-    <!-- TOP_5_SOURCES_DATA_START -->
     <script src="Lebanon_src/top_5_sources_data.js"></script>
-    <!-- TOP_5_SOURCES_DATA_END -->
-    <!-- OUTPUT_CONTEXT_RISKS_DATA_START -->
     <script src="Lebanon_src/output_context_risks_data.js"></script>
-    <!-- OUTPUT_CONTEXT_RISKS_DATA_END -->
-    <!-- INFORMATION_COVERAGE_DATA_START -->
     <script src="Lebanon_src/information_coverage_data.js"></script>
-    <!-- INFORMATION_COVERAGE_DATA_END -->
+    <script>window._DATA_STORE['lebanon'] = window._captureData();</script>
+    <!-- SUDAN DATA -->
+    <script src="Sudan_src/shown_risks_data.js"></script>
+    <script src="Sudan_src/humanitarian_access_data.js"></script>
+    <script src="Sudan_src/key_sector_numbers_data.js"></script>
+    <script src="Sudan_src/precrisis_vulnerabilities_data.js"></script>
+    <script src="Sudan_src/current_hazards_and_threats_data.js"></script>
+    <script src="Sudan_src/displacement_data.js"></script>
+    <script src="Sudan_src/displacement_risks_data.js"></script>
+    <script src="Sudan_src/final_numbers_data.js"></script>
+    <script src="Sudan_src/top_priority_interventions_data.js"></script>
+    <script src="Sudan_src/top_sectoral_needs_data.js"></script>
+    <script src="Sudan_src/top_5_sources_data.js"></script>
+    <script src="Sudan_src/output_context_risks_data.js"></script>
+    <script src="Sudan_src/information_coverage_data.js"></script>
+    <script>window._DATA_STORE['sudan'] = window._captureData();</script>
 </head>
 
 <body>
@@ -1178,9 +1190,8 @@
 
                 <div class="country-switcher">
                     <span class="country-switcher-label">Country Focus</span>
-                    <div class="country-options">
-                        <button class="country-button active" data-country-key="lebanon"
-                            onclick="switchCountry('lebanon')">Lebanon</button>
+                    <div class="country-options" id="country-options">
+                        <!-- Populated dynamically from COUNTRY_CONFIGS -->
                     </div>
                 </div>
 
@@ -1564,6 +1575,15 @@
     </footer>
 
     <script>
+        // ── Country configurations ────────────────────────────────────────────
+        // To add a new country: (1) create a <Name>_src/ folder with data JS files,
+        // (2) add the data script tags + capture block in <head>, and
+        // (3) add an entry here.
+        const COUNTRY_CONFIGS = [
+            { key: 'lebanon', label: 'Lebanon' },
+            { key: 'sudan',   label: 'Sudan'   }
+        ];
+
         const countryProfiles = {
             iran: {
                 headerTitle: 'Iran Crisis 2026',
@@ -1586,12 +1606,28 @@
                 scenarioEscalationDesc: 'Sustained conflict along the southern front; cross-border exchanges intensify and humanitarian access degrades',
                 scenarioEscalationImpact1: '• Mass displacement across Lebanon',
                 recommendedCrossBorder: '<strong>Weeks 2-4:</strong> Expand cross-border support in Syria, Cyprus, and Jordan based on scenario'
+            },
+            sudan: {
+                headerTitle: 'Sudan Crisis 2026',
+                headerSubtitle: 'Situation Analysis Dashboard • Real-time Data',
+                overviewIdpChange: 'Sudan',
+                displacementPrimaryLabel: 'Sudan (Internal Displacement)',
+                displacementPrimaryValue: '—',
+                displacementPrimaryDesc: 'Ongoing conflict-driven displacement across Sudan',
+                scenarioEscalationDesc: 'Continued armed conflict between SAF and RSF; civilian infrastructure targeted; mass displacement persists',
+                scenarioEscalationImpact1: '• Mass displacement across Sudan',
+                recommendedCrossBorder: '<strong>Weeks 2-4:</strong> Expand cross-border support in Chad, South Sudan, and Egypt based on scenario'
             }
         };
 
         function switchCountry(countryKey) {
             const profile = countryProfiles[countryKey];
             if (!profile) return;
+
+            // Restore data for the selected country then rebuild all widgets
+            if (window._DATA_STORE && window._DATA_STORE[countryKey]) {
+                window._restoreData(window._DATA_STORE[countryKey]);
+            }
 
             const mappedFields = document.querySelectorAll('[data-country-field]');
             mappedFields.forEach(element => {
@@ -1605,6 +1641,24 @@
             countryButtons.forEach(button => {
                 button.classList.toggle('active', button.getAttribute('data-country-key') === countryKey);
             });
+
+            buildAllWidgets();
+        }
+
+        function buildAllWidgets() {
+            buildSectorsTable();
+            buildAccessBarriers();
+            buildKeyNumbers();
+            buildPrecrisisVulnerabilities();
+            buildCurrentHazardsAndThreats();
+            buildOverviewKPIs();
+            buildContextRisks();
+            buildDisplacementKPIs();
+            buildTopSources();
+            buildDisplacementData();
+            buildPriorityInterventions();
+            buildSectoralNeeds();
+            buildInfoCoverage();
         }
 
         function switchTab(tabName) {
@@ -1681,20 +1735,19 @@
             tbody.innerHTML = rows.join('');
         }
 
-        buildSectorsTable();
-        buildAccessBarriers();
-        buildKeyNumbers();
-        buildPrecrisisVulnerabilities();
-        buildCurrentHazardsAndThreats();
-        buildOverviewKPIs();
-        buildContextRisks();
-        buildDisplacementKPIs();
-        buildTopSources();
-        buildDisplacementData();
-        buildPriorityInterventions();
-        buildSectoralNeeds();
-
-        switchCountry('lebanon');
+        // Generate country switcher buttons dynamically
+        (function () {
+            const container = document.getElementById('country-options');
+            if (!container) return;
+            COUNTRY_CONFIGS.forEach(({ key, label }) => {
+                const btn = document.createElement('button');
+                btn.className = 'country-button';
+                btn.setAttribute('data-country-key', key);
+                btn.addEventListener('click', () => switchCountry(key));
+                btn.textContent = label;
+                container.appendChild(btn);
+            });
+        })();
 
         function buildKeyNumbers() {
             const container = document.getElementById('key-numbers-container');
@@ -1800,7 +1853,10 @@
             const grid = document.getElementById('overview-kpis-grid');
             if (!grid) return;
             const data = window.FINAL_NUMBERS_DATA;
-            if (!data || data.length === 0) return;
+            if (!data || data.length === 0) {
+                grid.innerHTML = '';
+                return;
+            }
 
             const colorMap = { killed: '#E83231', injured: '#f97316', displaced: '#002D62' };
             const labelMap = { killed: 'People Killed', injured: 'People Injured', displaced: 'People Displaced' };
@@ -1997,10 +2053,11 @@
 
             const tagsEl = document.getElementById('ic-summary-tags');
             if (tagsEl) {
-                const ctxCount = (data.context || []).length;
-                const anaCount = (data.analysis || []).reduce((s, p) => s + p.entries.length, 0);
+                const ctxCount = (data.analysis || []).filter(p => p.pillar === 'Context').reduce((s, p) => s + p.entries.length, 0)
+                               + (data.context || []).length;
+                const anaCount = (data.analysis || []).filter(p => p.pillar !== 'Context').reduce((s, p) => s + p.entries.length, 0);
                 tagsEl.innerHTML = [
-                    `<span class="ic-tag">📂 ${ctxCount} context pillars</span>`,
+                    `<span class="ic-tag">📂 ${ctxCount} context sub-pillars</span>`,
                     `<span class="ic-tag">🔍 ${anaCount} analysis entries</span>`,
                     `<span class="ic-tag">⚠ ${data.total_gaps || 0} gaps identified</span>`,
                     `<span class="ic-tag ic-color-${icScoreClass(score)}">${icScoreLabel(score)} overall</span>`,
@@ -2084,7 +2141,6 @@
             }
         }
 
-        buildInfoCoverage();
         // ────────────────────────────────────────────────────────────────────
 
         function buildAccessBarriers() {
@@ -2111,6 +2167,8 @@
 
             list.innerHTML = items.join('');
         }
+
+        switchCountry('lebanon');
     </script>
 </body>
 

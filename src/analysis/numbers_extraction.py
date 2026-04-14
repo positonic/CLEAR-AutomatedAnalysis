@@ -170,7 +170,7 @@ def _extract_numbers(classification_df: pd.DataFrame) -> pd.DataFrame:
                 one_entry_df = pd.DataFrame([one_entry])
                 one_entry_df["Entry ID"] = id_
                 one_entry_df["Extraction Text"] = entry_text
-                one_entry_df["tag"] = numbers_extraction_entries_df.iloc[i]["tag"]
+                one_entry_df["tag"] = [numbers_extraction_entries_df.iloc[i]["tag"]] * len(one_entry_df)
                 final_entry_df = pd.concat(
                     [final_entry_df, one_entry_df], ignore_index=True
                 )

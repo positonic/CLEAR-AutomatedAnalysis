@@ -19,6 +19,12 @@ import pandas as pd
 from src.analysis.merge_numbers import merge_entries_by_number
 
 
+def _custom_eval(x):
+    try:
+        return literal_eval(x)
+    except Exception as e:
+        return "Unknown"
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -75,7 +81,7 @@ def load_data(data_folder: str) -> dict:
     )
     classification_df = pd.read_csv(classification_csv)
     classification_df["Document Source"] = classification_df["Document Source"].apply(
-        literal_eval
+        _custom_eval
     )
     classification_df = classification_df[["Entry ID", "Document Source"]]
     classification_df["Entry ID"] = classification_df["Entry ID"].astype(int)
@@ -235,24 +241,27 @@ def generate_key_sector_numbers(
             ][["sector", "key_indicator", "number", "unit"]].head(1)
             rows.append(best_row)
 
-    table = (
-        pd.concat(rows)
-        .sort_values(by="sector")
-        .drop_duplicates(subset=["sector", "key_indicator", "number", "unit"])
-    )
-
-    grouped = {"Sectoral Needs": []}
-    for _, row in table.iterrows():
-        grouped["Sectoral Needs"].append(
-            {
-                "key_indicator": row["key_indicator"],
-                "number": None if pd.isna(row["number"]) else row["number"],
-                "unit": row["unit"],
-            }
+    if len(rows) == 0:
+        grouped = {"Sectoral Needs": []}
+    else:
+        grouped = {"Sectoral Needs": []}
+        table = (
+            pd.concat(rows)
+            .sort_values(by="sector")
+            .drop_duplicates(subset=["sector", "key_indicator", "number", "unit"])
         )
+        for _, row in table.iterrows():
+            grouped["Sectoral Needs"].append(
+                {
+                    "key_indicator": row["key_indicator"],
+                    "number": None if pd.isna(row["number"]) else row["number"],
+                    "unit": row["unit"],
+                }
+            )
+            print(f"  ({len(grouped['Sectoral Needs'])} rows)")
 
     _write_js(viz_folder, "key_sector_numbers_data.js", "KEY_NUMBERS_DATA", grouped)
-    print(f"  ({len(table)} rows)")
+    
     return grouped
 
 
@@ -397,23 +406,27 @@ def generate_final_numbers(
             numbers_df["what_happened"].isin(keep_what_happened)
         )
         & (numbers_df["start_location"] == country)
+        & (numbers_df["number"] > 100)
     ]
     merged = merge_entries_by_number(filtered)
-    # sort by keep_what_happened priority
-    merged = merged.sort_values(by="what_happened", key=lambda x: x.isin(keep_what_happened).astype(int), ascending=True)
 
-    data = []
-    for what_happened in merged["what_happened"].unique():
-        subset = merged[merged["what_happened"] == what_happened]
-        max_num = subset["number"].max()
-        best = subset[subset["number"] == max_num].iloc[0]
-        data.append(
-            {
-                "what_happened": what_happened,
-                "number": int(best["number"]),
-                "unit": best["unit"],
-            }
-        )
+    if len(merged) == 0:
+        data = []
+    else:
+        # sort by keep_what_happened priority
+        merged = merged.sort_values(by="what_happened", key=lambda x: x.isin(keep_what_happened).astype(int), ascending=True)
+        data = []
+        for what_happened in merged["what_happened"].unique():
+            subset = merged[merged["what_happened"] == what_happened]
+            max_num = subset["number"].max()
+            best = subset[subset["number"] == max_num].iloc[0]
+            data.append(
+                {
+                    "what_happened": what_happened,
+                    "number": int(best["number"]),
+                    "unit": best["unit"],
+                }
+            )
 
     _write_js(viz_folder, "final_numbers_data.js", "FINAL_NUMBERS_DATA", data)
     print(f"  ({len(data)} event types)")
@@ -591,7 +604,7 @@ def generate_information_coverage(
 # ---------------------------------------------------------------------------
 
 
-def run(data_folder: str, viz_folder: str, country: str) -> None:
+def generate_dashboard_data(data_folder: str, viz_folder: str, country: str) -> None:
     print(f"Loading data from: {data_folder}")
     data = load_data(data_folder)
 
@@ -644,17 +657,3 @@ def run(data_folder: str, viz_folder: str, country: str) -> None:
     print("\n--- Generating information_coverage ---")
     generate_information_coverage(context_figures, information_coverage_gaps, viz_folder)
 
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--country", type=str, default="Lebanon")
-    args = parser.parse_args()
-    run(
-        data_folder=f"data/WestAsia2026/analysis/{args.country}/",
-        viz_folder=f"src/viz/{args.country}_src/",
-        country=args.country,
-    )
-
-
-if __name__ == "__main__":
-    main()

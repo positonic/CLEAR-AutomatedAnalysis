@@ -4,6 +4,7 @@ from data_connectors import get_reliefweb_leads
 from src.analysis.documents_based_analysis import _perform_documents_based_analysis
 from src.analysis.numbers_extraction import performs_numbers_extraction
 from src.analysis.context_generation import generate_context
+from src.analysis.generate_ui import generate_dashboard_data
 import argparse
 import dotenv
 import os
@@ -88,8 +89,8 @@ def _import_classification_dataset(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sample_bool", type=str, default="true")
-    parser.add_argument("--project_name", type=str, default="WestAsia2026")
+    parser.add_argument("--sample_bool", type=str, default="false")
+    parser.add_argument("--project_name", type=str, default="Sudan2026")
     parser.add_argument("--text_column", type=str, default="text")
     parser.add_argument("--entries_column", type=str, default="Extraction Text")
     parser.add_argument(
@@ -97,7 +98,7 @@ def main() -> None:
     )
     parser.add_argument("--prediction_ratio", type=float, default=1.05)
     parser.add_argument(
-        "--countries_to_analyze", type=str, nargs="+", default="Lebanon"
+        "--countries_to_analyze", type=str, nargs="+", default="Sudan"
     )
     parser.add_argument("--n_kept_entries", type=int, default=12)
     parser.add_argument("--answers_save_path", type=str, default="answers.json")
@@ -115,6 +116,7 @@ def main() -> None:
         type=str,
         default="priority_interventions.json",
     )
+    parser.add_argument("--model_name", type=str, default="gpt-4.1-nano")
     args = parser.parse_args()
 
     sample = args.sample_bool.lower() == "true"
@@ -128,6 +130,7 @@ def main() -> None:
         extract_pdf_text=True,
         save=True,
         sample=sample,
+        model_name=args.model_name,
     )
 
     classification_dataset_path = os.path.join(
@@ -181,6 +184,12 @@ def main() -> None:
         )
 
         generate_context(country, os.path.join(save_folder, country, "context_figures.json"))
+
+        generate_dashboard_data(
+            data_folder=f"data/{args.project_name}/analysis/{country}/",
+            viz_folder=f"src/viz/{country}_src/",
+            country=country,
+        )
 
 
 if __name__ == "__main__":
