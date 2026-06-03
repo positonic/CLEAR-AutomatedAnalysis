@@ -45,6 +45,14 @@ clear-create-report-data = "cli.create_report_data:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src", "cli"]
 
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+# Run pytest from the repo root; put the root on sys.path so `import cli` works.
+pythonpath = ["."]
+testpaths = ["tests"]
+
 [tool.uv]
 override-dependencies = [
     "onnxruntime-silicon==1.16.3; sys_platform == 'darwin' and platform_machine == 'arm64' and platform_release >= '23.0.0'",
