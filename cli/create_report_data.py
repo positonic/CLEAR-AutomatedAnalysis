@@ -5,15 +5,24 @@ from src.analysis.documents_based_analysis import _perform_documents_based_analy
 from src.analysis.numbers_extraction import performs_numbers_extraction
 from src.analysis.context_generation import generate_context
 from src.analysis.generate_ui import generate_dashboard_data
+from cli.ingest_window import (
+    DEFAULT_COUNTRY_CODE,
+    DEFAULT_WINDOW_DAYS,
+    build_rw_url,
+    date_stamped_project_name,
+    parse_run_date,
+    parse_window,
+    rolling_window,
+)
 import argparse
 import dotenv
 import os
+from datetime import date
 from typing import Dict
 
 dotenv.load_dotenv()
 
 openai_api_key = os.getenv("openai_api_key")
-RW_url = "https://reliefweb.int/updates?advanced-search=%28C220%29_%28DO20260315-20260321%29&page={}"
 
 
 def _extract_entries(
@@ -117,15 +126,67 @@ def main() -> None:
         default="priority_interventions.json",
     )
     parser.add_argument("--model_name", type=str, default="gpt-4.1-nano")
+
+    # ── Rolling ReliefWeb ingest window + date-stamped run scope ──
+    parser.add_argument(
+        "--ingest_window_days",
+        type=int,
+        default=int(os.getenv("RW_INGEST_WINDOW_DAYS", DEFAULT_WINDOW_DAYS)),
+        help="Length (days) of the rolling RW window ending on the run date.",
+    )
+    parser.add_argument(
+        "--run_date",
+        type=str,
+        default=os.getenv("RW_RUN_DATE"),
+        help="Pin the run date as YYYYMMDD (default: today). Drives both the "
+        "window end and the date stamp — pass an old date to replay a run.",
+    )
+    parser.add_argument(
+        "--rw_date_range",
+        type=str,
+        default=os.getenv("RW_DATE_RANGE"),
+        help="Pin an explicit RW window as YYYYMMDD-YYYYMMDD, overriding the "
+        "rolling window (for exact reproducibility of an old run).",
+    )
+    parser.add_argument(
+        "--rw_country_code",
+        type=str,
+        default=os.getenv("RW_COUNTRY_CODE", DEFAULT_COUNTRY_CODE),
+        help="ReliefWeb country code for the advanced-search filter.",
+    )
+    parser.add_argument(
+        "--date_stamp_project",
+        type=str,
+        default="true",
+        help="Append _YYYYMMDD to project_name so each run gets a fresh "
+        "folder. Set false to pin the exact folder name for a replay.",
+    )
     args = parser.parse_args()
 
     sample = args.sample_bool.lower() == "true"
 
+    # Resolve the ingest window + run scope from the run date (or pins).
+    run_date = parse_run_date(args.run_date) if args.run_date else date.today()
+    if args.rw_date_range:
+        window = parse_window(args.rw_date_range)
+    else:
+        window = rolling_window(run_date, args.ingest_window_days)
+    rw_url = build_rw_url(window, args.rw_country_code)
+    project_name = (
+        date_stamped_project_name(args.project_name, run_date)
+        if args.date_stamp_project.lower() == "true"
+        else args.project_name
+    )
+    print(
+        f"[ingest] RW window {window.rw_param()} ({window.days}d) "
+        f"→ project '{project_name}'"
+    )
+
     leads_df = get_reliefweb_leads(
-        project_page_starting_url=RW_url,
-        project_name=args.project_name,
+        project_page_starting_url=rw_url,
+        project_name=project_name,
         data_folder="data",
-        extracted_data_path=os.path.join("data", args.project_name, "leads.csv"),
+        extracted_data_path=os.path.join("data", project_name, "leads.csv"),
         openai_api_key=openai_api_key,  # falls back to OPENAI_API_KEY env var
         extract_pdf_text=True,
         save=True,
@@ -134,7 +195,7 @@ def main() -> None:
     )
 
     classification_dataset_path = os.path.join(
-        "data", args.project_name, "classification_dataset.csv"
+        "data", project_name, "classification_dataset.csv"
     )
 
     if not os.path.exists(classification_dataset_path):
@@ -157,7 +218,7 @@ def main() -> None:
         entries_df["Entry ID"] = entries_df.index
         entries_df.to_csv(classification_dataset_path, index=False)
 
-    save_folder = os.path.join("data", args.project_name, "analysis")
+    save_folder = os.path.join("data", project_name, "analysis")
     classification_df = _import_classification_dataset(
         classification_dataset_path, args.classification_column
     )
@@ -186,7 +247,7 @@ def main() -> None:
         generate_context(country, os.path.join(save_folder, country, "context_figures.json"))
 
         generate_dashboard_data(
-            data_folder=f"data/{args.project_name}/analysis/{country}/",
+            data_folder=f"data/{project_name}/analysis/{country}/",
             viz_folder=f"src/viz/{country}_src/",
             country=country,
         )
