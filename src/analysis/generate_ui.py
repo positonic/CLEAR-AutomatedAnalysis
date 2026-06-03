@@ -13,10 +13,13 @@ import json
 import os
 from ast import literal_eval
 from collections import defaultdict
+from datetime import datetime, timezone
+from typing import Optional
 
 import pandas as pd
 
 from src.analysis.merge_numbers import merge_entries_by_number
+from src.analysis.bundle_assembler import assemble_bundle
 
 
 def _custom_eval(x):
@@ -604,7 +607,21 @@ def generate_information_coverage(
 # ---------------------------------------------------------------------------
 
 
-def generate_dashboard_data(data_folder: str, viz_folder: str, country: str) -> None:
+def generate_dashboard_data(
+    data_folder: str,
+    viz_folder: str,
+    country: str,
+    project_name: str = "",
+    generated_at: Optional[str] = None,
+) -> dict:
+    """Generate the per-country dashboard `.js` files (unchanged) AND return the
+    assembled Situation Analysis bundle dict.
+
+    The bundle carries the 13 dashboard structures captured from the generators
+    below, a reserved ``summary`` slot, provenance, and an empty ``sources``
+    list (the publisher enriches + archives sources, since that needs leads/URLs
+    and the upload route). See ``bundle_assembler`` / ``sources_builder``.
+    """
     print(f"Loading data from: {data_folder}")
     data = load_data(data_folder)
 
@@ -618,42 +635,71 @@ def generate_dashboard_data(data_folder: str, viz_folder: str, country: str) -> 
     numbers_df = data["numbers_df"]
     classification_df = data["classification_df"]
 
+    structures: dict = {}
+
     print("\n--- Generating shown_risks ---")
-    generate_shown_risks(risks_df, data_folder, viz_folder)
+    structures["shown_risks"] = generate_shown_risks(risks_df, data_folder, viz_folder)
 
     print("\n--- Generating humanitarian_access_data ---")
-    generate_humanitarian_access_data(risks_df, key_indicator_numbers_df, viz_folder)
+    structures["humanitarian_access"] = generate_humanitarian_access_data(
+        risks_df, key_indicator_numbers_df, viz_folder
+    )
 
     print("\n--- Generating key_sector_numbers ---")
-    generate_key_sector_numbers(key_indicator_numbers_df, viz_folder)
+    structures["key_sector_numbers"] = generate_key_sector_numbers(
+        key_indicator_numbers_df, viz_folder
+    )
 
     print("\n--- Generating current_hazards_and_threats ---")
-    generate_current_hazards_and_threats(risks_df, viz_folder)
+    structures["current_hazards_and_threats"] = generate_current_hazards_and_threats(
+        risks_df, viz_folder
+    )
 
     print("\n--- Generating precrisis_vulnerabilities ---")
-    generate_precrisis_vulnerabilities(risks_df, viz_folder)
+    structures["precrisis_vulnerabilities"] = generate_precrisis_vulnerabilities(
+        risks_df, viz_folder
+    )
 
     print("\n--- Generating displacement_risks ---")
-    generate_displacement_risks(risks_df, viz_folder)
+    structures["displacement_risks"] = generate_displacement_risks(risks_df, viz_folder)
 
     print("\n--- Generating top_sectoral_needs ---")
-    generate_top_sectoral_needs(priority_needs_df, viz_folder)
+    structures["top_sectoral_needs"] = generate_top_sectoral_needs(
+        priority_needs_df, viz_folder
+    )
 
     print("\n--- Generating top_priority_interventions ---")
-    generate_top_priority_interventions(priority_interventions_df, viz_folder)
+    structures["top_priority_interventions"] = generate_top_priority_interventions(
+        priority_interventions_df, viz_folder
+    )
 
     print("\n--- Generating displacement_numbers ---")
-    generate_displacement_numbers(numbers_df, viz_folder, country)
+    structures["displacement"] = generate_displacement_numbers(
+        numbers_df, viz_folder, country
+    )
 
     print("\n--- Generating final_numbers ---")
-    generate_final_numbers(numbers_df, viz_folder, country)
+    structures["final_numbers"] = generate_final_numbers(numbers_df, viz_folder, country)
 
     print("\n--- Generating top_5_sources ---")
-    generate_top_5_sources(answers_df, classification_df, viz_folder)
+    structures["top_5_sources"] = generate_top_5_sources(
+        answers_df, classification_df, viz_folder
+    )
 
     print("\n--- Generating output_context_risks ---")
-    generate_output_context_risks(context_figures, viz_folder)
+    structures["output_context_risks"] = generate_output_context_risks(
+        context_figures, viz_folder
+    )
 
     print("\n--- Generating information_coverage ---")
-    generate_information_coverage(context_figures, information_coverage_gaps, viz_folder)
+    structures["information_coverage"] = generate_information_coverage(
+        context_figures, information_coverage_gaps, viz_folder
+    )
+
+    return assemble_bundle(
+        structures,
+        sources=[],
+        project_name=project_name,
+        generated_at=generated_at or datetime.now(timezone.utc).isoformat(),
+    )
 
