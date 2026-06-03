@@ -5,6 +5,9 @@ from src.analysis.documents_based_analysis import _perform_documents_based_analy
 from src.analysis.numbers_extraction import performs_numbers_extraction
 from src.analysis.context_generation import generate_context
 from src.analysis.generate_ui import generate_dashboard_data
+from src.analysis.sources_builder import build_sources
+from src.analysis.clear_api_client import ClearApiClient
+from src.analysis.publisher import publish_situation_analysis, pdf_loader_from_dir
 from cli.ingest_window import (
     DEFAULT_COUNTRY_CODE,
     DEFAULT_WINDOW_DAYS,
@@ -246,11 +249,47 @@ def main() -> None:
 
         generate_context(country, os.path.join(save_folder, country, "context_figures.json"))
 
-        generate_dashboard_data(
+        bundle = generate_dashboard_data(
             data_folder=f"data/{project_name}/analysis/{country}/",
             viz_folder=f"src/viz/{country}_src/",
             country=country,
+            project_name=project_name,
         )
+
+        # Enrich sources from the cited names + leads, then publish the bundle
+        # to clear-api when a pipeline key is configured. The standalone `.js`
+        # files above are always written regardless.
+        bundle["sources"] = build_sources(bundle.get("top_5_sources") or [], leads_df)
+        _publish_bundle(country, bundle, project_name)
+
+
+def _publish_bundle(country: str, bundle: dict, project_name: str) -> None:
+    """Publish the assembled bundle to clear-api if CLEAR_API_URL +
+    PIPELINE_API_KEY are set; otherwise skip (dashboard `.js` files still
+    written). Failures are logged, never fatal to the run."""
+    base_url = os.getenv("CLEAR_API_URL")
+    api_key = os.getenv("PIPELINE_API_KEY")
+    if not base_url or not api_key:
+        print(
+            f"[publish] CLEAR_API_URL / PIPELINE_API_KEY not set — skipping "
+            f"clear-api publish for {country} (dashboard .js still written)."
+        )
+        return
+    try:
+        client = ClearApiClient(base_url, api_key)
+        pdf_dir = os.path.join("data", project_name, "pdf_files")
+        result = publish_situation_analysis(
+            client,
+            country,
+            bundle,
+            source_pdf_loader=pdf_loader_from_dir(pdf_dir),
+        )
+        print(
+            f"[publish] {country}: location {result['locationId']}, "
+            f"{result['archived']} source PDF(s) archived, bundle upserted."
+        )
+    except Exception as exc:  # noqa: BLE001 — publishing must not fail the run
+        print(f"[publish] WARNING: failed to publish {country}: {exc}")
 
 
 if __name__ == "__main__":
