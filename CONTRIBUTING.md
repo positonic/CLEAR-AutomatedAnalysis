@@ -36,21 +36,17 @@ root (the variable name is lowercase):
 openai_api_key=sk-...
 ```
 
-Then run one country end to end. `--sample_bool true` processes a small sample, which keeps a
-first run cheap:
+Then run the default country (Sudan) end to end. `--sample_bool true` processes a small sample,
+which keeps a first run cheap:
 
 ```bash
-uv run clear-create-report-data --countries_to_analyze Sudan --sample_bool true
+uv run clear-create-report-data --sample_bool true   # Sudan, last 7 days
 ```
 
 The run scrapes ReliefWeb for a rolling date window ending today, then writes everything under
 `data/<project_name>_<YYYYMMDD>/` (gitignored) and the dashboard `.js` files under `src/viz/`.
 `--run_date YYYYMMDD` or `--rw_date_range YYYYMMDD-YYYYMMDD` pins the window to replay an old run.
 `uv run clear-create-report-data --help` lists every option.
-
-> The README's "Running the Pipeline" section still describes the older two-command layout
-> (`clear-create-entries` / `clear-generate-ui`). The single `clear-create-report-data` command
-> above is what `pyproject.toml` defines today.
 
 **What needs credentials from the team**
 
