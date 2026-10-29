@@ -268,3 +268,13 @@ Open `src/viz/iran_crisis_dashboard.html` directly in any browser. All data file
 ## What's Next
 
 See [`next-steps.md`](next-steps.md) for planned improvements, including NLP model retraining on multilingual data, recommended actions, forecasting, and scenario modelling.
+
+---
+
+## Contributing
+
+How to get set up, the PR workflow, and where work is tracked: see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Licensed under the GNU General Public License v3.0. See [`LICENSE`](./LICENSE) for the full text.
