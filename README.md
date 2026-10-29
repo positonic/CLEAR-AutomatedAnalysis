@@ -1,6 +1,6 @@
 # CLEAR — Automated Situation Analysis
 
-**CLEAR** (Crisis-Led Evidence and Analysis for Response) is a two-stage pipeline that turns raw humanitarian documents into a fully interactive, downloadable situation analysis dashboard, following the [NRC Situation Analysis Framework (SAF)](https://www.nrc.no/).
+**CLEAR** (Crisis-Led Evidence and Analysis for Response) is a pipeline that turns raw humanitarian documents into a fully interactive, downloadable situation analysis dashboard, following the [NRC Situation Analysis Framework (SAF)](https://www.nrc.no/).
 
 ---
 
@@ -8,24 +8,28 @@
 
 ```mermaid
 flowchart LR
-    A([ReliefWeb\nDocuments & PDFs]) --> B[clear-create-entries\ncli/create_entries.py]
+    A([ReliefWeb\nDocuments & PDFs]) --> B[Ingest · extract · classify\ncli/create_report_data.py]
     B --> C[(classification_dataset.csv)]
     C --> D[LLM Analysis\ndocuments_based_analysis.py]
     C --> E[Numbers Extraction\nnumbers_extraction.py]
     A2([Web Search]) --> F[Context Generation\ncontext_generation.py]
-    D --> G[(answers.json\nrisk_list.json\nkey_indicator_numbers.json\npriority_needs.json\npriority_interventions.json)]
+    D --> G[(answers.json\nrisk_list.json\nkey_indicator_numbers.json\npriority_needs.json\npriority_interventions.json\ninformation_coverage_gaps.json)]
     E --> H[(numbers_extraction.csv)]
     F --> I[(context_figures.json)]
-    G & H & I --> J[clear-generate-ui\ncli/generate_ui.py]
-    J --> K[(JS data files\nsrc/viz/)]
-    K --> L([iran_crisis_dashboard.html\nInteractive Dashboard])
+    G & H & I --> J[Dashboard data\nsrc/analysis/generate_ui.py]
+    J --> K[(JS data files\nsrc/viz/Country_src/)]
+    K --> L([crisis_dashboard.html\nInteractive Dashboard])
+    J --> M[Publish\npublisher.py]
+    M --> N([clear-api\nSituation Analysis])
 ```
+
+Every step runs from one command, `uv run clear-create-report-data` (see [Running the Pipeline](#running-the-pipeline)). The publish step only runs when `CLEAR_API_URL` and `PIPELINE_API_KEY` are set.
 
 ---
 
-## Stage 1 — `1-create_entries_dataset.py`
+## Stage 1 — Build the analysis dataset
 
-Ingests raw documents and produces structured analysis outputs.
+Ingests raw documents and produces structured analysis outputs (`cli/create_report_data.py`).
 
 ```mermaid
 flowchart TD
@@ -40,7 +44,7 @@ flowchart TD
     H --> I[documents_based_analysis\ngpt-4.1-mini · parallel prompts]
     H --> J[numbers_extraction\ngpt-4.1-mini · structured JSON]
     H --> K[context_generation\ngpt-5-mini · web search]
-    I --> L[(answers.json\nrisk_list.json\nkey_indicator_numbers.json\npriority_needs.json\npriority_interventions.json)]
+    I --> L[(answers.json\nrisk_list.json\nkey_indicator_numbers.json\npriority_needs.json\npriority_interventions.json\ninformation_coverage_gaps.json)]
     J --> M[(numbers_extraction.csv)]
     K --> N[(context_figures.json)]
 ```
@@ -83,9 +87,9 @@ number · unit · what_happened · start/end date+precision · start/end locatio
 
 ---
 
-## Stage 2 — `2-generate_UI_results.py`
+## Stage 2 — Generate dashboard data
 
-Reads all analysis JSON/CSV outputs and generates the JavaScript data files that power the dashboard. Each function applies severity filtering to keep only the most critical information.
+Reads all analysis JSON/CSV outputs and generates the JavaScript data files that power the dashboard (`src/analysis/generate_ui.py`, called at the end of each country's run). Each function applies severity filtering to keep only the most critical information.
 
 ```mermaid
 flowchart TD
@@ -98,9 +102,10 @@ flowchart TD
         A6[(numbers_extraction.csv)]
         A7[(context_figures.json)]
         A8[(classification_dataset.csv)]
+        A9[(information_coverage_gaps.json)]
     end
 
-    subgraph "JS Data Files → src/viz/"
+    subgraph "JS Data Files → src/viz/Country_src/"
         B1[shown_risks_data.js\nSeverity matrix: Pillar 2D × Sector\nTop-3 risks per cell]
         B2[humanitarian_access_data.js\nAccess barriers with score ≥ 8]
         B3[key_sector_numbers_data.js\nCritical numbers: score ≥ 8, value > 100]
@@ -113,6 +118,7 @@ flowchart TD
         B10[final_numbers_data.js\nMax figures per event type: score ≥ 8]
         B11[top_5_sources_data.js\nMost-cited source documents]
         B12[output_context_risks_data.js\nContext risks with score ≥ 9]
+        B13[information_coverage_data.js\nCoverage gaps per context pillar]
     end
 
     A2 --> B1
@@ -128,6 +134,7 @@ flowchart TD
     A6 --> B10
     A1 & A8 --> B11
     A7 --> B12
+    A7 & A9 --> B13
 ```
 
 ### Severity Filter Logic
@@ -145,7 +152,7 @@ flowchart TD
 
 ---
 
-## Dashboard — `src/viz/iran_crisis_dashboard.html`
+## Dashboard — `src/viz/crisis_dashboard.html`
 
 A self-contained HTML file that loads the JS data files and renders three interactive tabs. No server required — open directly in a browser or share as a standalone file.
 
@@ -170,7 +177,7 @@ flowchart LR
     end
 ```
 
-The dashboard supports **country switching** (Lebanon / Iran) and a **one-click PDF export** that renders all three tabs into a print-ready document.
+The dashboard supports **country switching** (Lebanon / Sudan) and a **one-click PDF export** that renders all three tabs into a print-ready document.
 
 ---
 
@@ -179,8 +186,8 @@ The dashboard supports **country switching** (Lebanon / Iran) and a **one-click 
 ```
 CLEAR-AutomatedAnalysis/
 ├── cli/
-│   ├── create_entries.py            # Stage 1: data ingestion & analysis  →  uv run clear-create-entries
-│   └── generate_ui.py               # Stage 2: dashboard data generation  →  uv run clear-generate-ui
+│   ├── create_report_data.py        # The whole pipeline  →  uv run clear-create-report-data
+│   └── ingest_window.py             # Rolling ReliefWeb date window + date-stamped run folder
 │
 ├── src/
 │   ├── analysis/
@@ -188,14 +195,21 @@ CLEAR-AutomatedAnalysis/
 │   │   ├── documents_based_analysis.py  # LLM prompting & output parsing
 │   │   ├── numbers_extraction.py    # Structured numerical data extraction
 │   │   ├── context_generation.py    # Web-search context generation
-│   │   └── merge_numbers.py         # Number deduplication logic
+│   │   ├── merge_numbers.py         # Number deduplication logic
+│   │   ├── generate_ui.py           # Stage 2: dashboard data generation
+│   │   ├── bundle_assembler.py      # Dashboard structures → publishable bundle
+│   │   ├── sources_builder.py       # Cited sources enriched from the leads
+│   │   ├── publisher.py             # Archives source PDFs, upserts the bundle to clear-api
+│   │   └── clear_api_client.py      # GraphQL client for clear-api
 │   └── viz/
-│       ├── iran_crisis_dashboard.html   # Interactive dashboard
-│       └── *.js                         # Generated data files (output of Stage 2)
+│       ├── crisis_dashboard.html    # Interactive dashboard
+│       └── {Country}_src/*.js       # Generated data files (output of Stage 2)
 │
-└── data/
-    ├── leads.csv                    # Raw document metadata
-    └── {ProjectName}/
+├── tests/                           # pytest unit tests (no keys or network needed)
+│
+└── data/                            # gitignored
+    └── {ProjectName}_{YYYYMMDD}/
+        ├── leads.csv                # Raw document metadata
         ├── classification_dataset.csv   # Entries + HumBERT tags
         ├── pdf_files/               # Downloaded PDF documents
         └── analysis/
@@ -205,6 +219,7 @@ CLEAR-AutomatedAnalysis/
                 ├── key_indicator_numbers.json
                 ├── priority_needs.json
                 ├── priority_interventions.json
+                ├── information_coverage_gaps.json
                 ├── numbers_extraction.csv
                 ├── context_figures.json
                 └── shown_risks.json
@@ -214,42 +229,46 @@ CLEAR-AutomatedAnalysis/
 
 ## Running the Pipeline
 
-**Prerequisites:** set `openai_api_key` in a `.env` file at the repo root.
+**Prerequisites:** Python 3.11 and [uv](https://docs.astral.sh/uv/). Set `openai_api_key` in a `.env` file at the repo root.
 
-Install dependencies with [uv](https://docs.astral.sh/uv/):
+Install dependencies (this includes the dev group, so `uv run pytest -q` runs the tests):
 
 ```bash
 uv sync
 ```
 
-### Stage 1 — Build the analysis dataset
+### Run the pipeline
+
+One command runs every stage: ReliefWeb ingest, entry extraction, HumBERT classification, LLM analysis, numbers extraction, context generation, dashboard data, and (optionally) publishing to clear-api.
 
 ```bash
-uv run clear-create-entries \
-  --project_name WestAsia2026 \
-  --countries_to_analyze Lebanon \
-  --n_kept_entries 12 \
-  --sample_bool false
+uv run clear-create-report-data --sample_bool true
 ```
+
+That scrapes ReliefWeb for Sudan over the last 7 days and writes to `data/Sudan2026_<YYYYMMDD>/`. Drop `--sample_bool true` for a full run.
 
 | Argument | Default | Description |
 |---|---|---|
-| `--project_name` | `WestAsia2026` | Name of the project / data subfolder |
-| `--countries_to_analyze` | `Lebanon` | Comma-separated list of countries |
+| `--project_name` | `Sudan2026` | Name of the project / data subfolder; `_YYYYMMDD` is appended unless `--date_stamp_project false` |
+| `--countries_to_analyze` | `Sudan` | Comma-separated list of countries to analyse |
+| `--rw_country_code` | `C220` (Sudan) | ReliefWeb country code used for the ingest search |
+| `--ingest_window_days` | `7` | Length of the rolling ReliefWeb window ending on the run date |
+| `--run_date` | today | Pin the run date as `YYYYMMDD` to replay an old run |
+| `--rw_date_range` | — | Pin an explicit window as `YYYYMMDD-YYYYMMDD` |
 | `--n_kept_entries` | `12` | Max entries per analysis prompt (higher = richer but slower) |
-| `--sample_bool` | `true` | `true` uses a small sample for testing |
+| `--sample_bool` | `false` | `true` uses a small sample for testing |
 
-Each sub-step is **idempotent** — if the output file already exists it is skipped, so you can resume interrupted runs safely.
+`uv run clear-create-report-data --help` lists every option. `RW_INGEST_WINDOW_DAYS`, `RW_RUN_DATE`, `RW_DATE_RANGE` and `RW_COUNTRY_CODE` are environment equivalents of the matching flags.
 
-### Stage 2 — Generate dashboard data
+Each sub-step is **idempotent** — if the output file already exists it is skipped. Because each run gets a date-stamped folder, resume an interrupted run by passing its `--run_date`.
 
-```bash
-uv run clear-generate-ui --country Lebanon
-```
+### Publish to clear-api (optional)
+
+Set `CLEAR_API_URL` and `PIPELINE_API_KEY` and the run upserts each country's Situation Analysis to clear-api and archives the cited source PDFs (see [ADR 0001](docs/adr/0001-situation-analysis-as-location-metadata.md)). Without them the publish step is skipped with a `[publish]` log line; the dashboard files are still written.
 
 ### View the dashboard
 
-Open `src/viz/iran_crisis_dashboard.html` directly in any browser. All data files must be in the same `src/viz/` folder.
+Open `src/viz/crisis_dashboard.html` directly in any browser. It loads each country's data from the `{Country}_src/` folder next to it.
 
 ---
 
